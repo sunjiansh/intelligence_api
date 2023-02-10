@@ -23,7 +23,7 @@ public class GenConfig {
     public GenConfig(String tableName) {
         this.cover = false;
         this.moduleName = "yshop-mall";
-        this.author = "hupeng";
+        this.author = "jiansun";
         this.pack = "co.yixiang.modules";
         this.tableName = tableName;
     }

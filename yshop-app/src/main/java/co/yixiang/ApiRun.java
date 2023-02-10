@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableAsync
 @EnableTransactionManagement
 @EnableCaching
-@MapperScan(basePackages ={"co.yixiang.modules.*.service.mapper", "co.yixiang.config"})
+@MapperScan(basePackages ={"co.yixiang.modules.*.service.mapper", "co.yixiang.modules.device.*.service.mapper","co.yixiang.config"})
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class , WxMaAutoConfiguration.class})
 public class ApiRun {
 
@@ -32,7 +32,7 @@ public class ApiRun {
                     " \\_, //___//_//_/\\___// .__/    \n" +
                     "/___/                /_/          \n "+
 
-                    "\n意象yshop电商系统移动端API启动成功 \n官网：https://www.yixiang.co 提供技术支持ﾞ  \n");
+                    "\n移动端API启动成功 \n官网：https://www.xx.co 提供技术支持ﾞ  \n");
     }
 
     @Bean

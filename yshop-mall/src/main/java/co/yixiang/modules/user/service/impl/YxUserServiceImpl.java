@@ -22,6 +22,7 @@ import co.yixiang.enums.Brokerage;
 import co.yixiang.enums.ShopCommonEnum;
 import co.yixiang.modules.activity.service.YxStoreCouponUserService;
 import co.yixiang.modules.cart.vo.YxStoreCartQueryVo;
+import co.yixiang.modules.device.apiservice.DWatchUricApiService;
 import co.yixiang.modules.order.domain.YxStoreOrderCartInfo;
 import co.yixiang.modules.order.service.YxStoreOrderCartInfoService;
 import co.yixiang.modules.order.service.YxStoreOrderService;
@@ -45,11 +46,14 @@ import co.yixiang.modules.user.service.mapper.UserBillMapper;
 import co.yixiang.modules.user.service.mapper.UserMapper;
 import co.yixiang.modules.user.vo.YxUserQueryVo;
 import co.yixiang.utils.FileUtil;
+import co.yixiang.utils.StringUtils;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.pagehelper.PageInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -71,6 +75,7 @@ import java.util.stream.Collectors;
 * @author hupeng
 * @date 2020-05-12
 */
+@Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class YxUserServiceImpl extends BaseServiceImpl<UserMapper, YxUser> implements YxUserService {
@@ -102,6 +107,8 @@ public class YxUserServiceImpl extends BaseServiceImpl<UserMapper, YxUser> imple
     private YxSystemStoreStaffService systemStoreStaffService;
     @Autowired
     private YxStoreOrderCartInfoService storeOrderCartInfoService;
+    @Autowired
+    private DWatchUricApiService dWatchUricApiService;
 
 
     /**
@@ -690,4 +697,188 @@ public class YxUserServiceImpl extends BaseServiceImpl<UserMapper, YxUser> imple
     public void incBrokeragePrice(BigDecimal price, Long uid) {
         yxUserMapper.incBrokeragePrice(price,uid);
     }
+
+
+    @Override
+    public void deleteByUid(Long uid) {
+        yxUserMapper.deleteByUid(uid);
+    }
+
+
+    @Override
+    public void syncNewUserInfo2WatchUric(YxUser user) throws Exception{
+        try {
+            JSONObject result  = dWatchUricApiService.syncUserInfo(user);
+            if(result.getInteger("code") != 200){
+                log.error(result.getString("msg"));
+            }
+        }catch (Exception e){
+             log.error("调用智能手环平台同步人员信息接口失败！"+e.getMessage());
+            throw new RuntimeException("调用智能手环平台同步人员信息接口失败！");
+        }
+    }
+
+
+    @Override
+    public void syncUpdateUserInfo2WatchUric(YxUser user) throws Exception {
+        try {
+            JSONObject result  = dWatchUricApiService.syncUserInfo(user);
+            if(result.getInteger("code") != 200){
+                log.error(result.getString("msg"));
+            }
+        }catch (Exception e){
+            log.error("调用智能手环平台同步人员信息接口失败！"+e.getMessage());
+            throw new RuntimeException("调用智能手环平台同步人员信息接口失败！");
+        }
+
+        YxUser existUser = baseMapper.selectById(user.getUid());
+        if(StringUtils.isNotEmpty(existUser.getImei())){
+            //解绑手环
+            try {
+                JSONObject result  = dWatchUricApiService.unBindWatch(existUser.getUid(),existUser.getImei());
+                if(result.getInteger("code") != 200){
+                    log.error(result.getString("msg"));
+                    throw new RuntimeException(result.getString("msg"));
+                }
+            }catch (Exception e){
+                log.error("调用智能手环平台解绑定手表接口失败！"+e.getMessage());
+                throw new RuntimeException("调用智能手环平台解绑定手表接口失败！"+e.getMessage());
+            }
+        }
+        user.setWatchBind(0);//重置手环绑定状态为未绑定
+        user.setUricBind(0);//重置尿酸检测仪绑定状态为未绑定
+    }
+
+
+    @Override
+    public boolean syncWatchBindInfo(Long userId, String imei) throws Exception {
+        boolean  flag = false;
+
+        //先查询该用户已绑定的设备，并解绑
+        String oldImei = dWatchUricApiService.queryBindedImeByUid(userId);
+        if(StringUtils.isNotEmpty(oldImei)){
+            //先解绑手环
+            try {
+                JSONObject result  = dWatchUricApiService.unBindWatch(userId,oldImei);
+                if(result.getInteger("code") != 200){
+                    log.error(result.getString("msg"));
+                }
+            }catch (Exception e){
+                log.error("调用智能手环平台解绑定手表接口失败！"+e.getMessage());
+                throw new RuntimeException("调用智能手环平台解绑定手表接口失败！");
+            }
+        }
+
+        //重新绑定手环
+        try {
+            JSONObject result  = dWatchUricApiService.bindWatch(userId,imei);
+            if(result.getInteger("code") != 200){
+                log.error(result.getString("msg"));
+                throw new RuntimeException(result.getString("msg"));
+            }else{
+                flag = true;
+            }
+        }catch (Exception e){
+            log.error("调用智能手环平台绑定手表接口失败！"+e.getMessage());
+            throw new RuntimeException("调用智能手环平台绑定手表接口失败！"+e.getMessage());
+        }
+
+        YxUser user = new YxUser();
+        user.setUid(userId);
+        user.setWatchBind(1);//1表示已同步
+
+        baseMapper.updateById(user);
+        return flag;
+    }
+
+
+    @Override
+    public void syncDelUserWatchBindInfo(Long userId) throws Exception {
+        YxUser existUser = baseMapper.selectById(userId);
+        if(StringUtils.isNotEmpty(existUser.getImei())){
+            //解绑手环
+            try {
+                JSONObject result  = dWatchUricApiService.unBindWatch(existUser.getUid(),existUser.getImei());
+                if(result.getInteger("code") != 200){
+                    log.error(result.getString("msg"));
+                    throw new RuntimeException(result.getString("msg"));
+                }
+            }catch (Exception e){
+                log.error("调用智能手环平台解绑定手表接口失败！"+e.getMessage());
+                throw new RuntimeException("调用智能手环平台解绑定手表接口失败！"+e.getMessage());
+            }
+        }
+    }
+
+
+    @Override
+    public void syncWatchConfig(String imei) throws Exception {
+        if(StringUtils.isNotEmpty(imei)){
+            //配置手环
+            try {
+                JSONObject result  = dWatchUricApiService.configWatch(imei);
+                if(result.getInteger("code") != 200){
+                    log.error(result.getString("msg"));
+                    throw new RuntimeException(result.getString("msg"));
+                }
+            }catch (Exception e){
+                log.error("调用智能手环平台配置手表接口失败！"+e.getMessage());
+                throw new RuntimeException("调用智能手环平台配置手表接口失败！"+e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public boolean syncUricBindInfo(Long userId, String sn) throws Exception {
+        boolean  flag = false;
+
+            //先解绑尿酸分析仪
+        try {
+            JSONObject result  = dWatchUricApiService.unBindUricDevice(userId);
+            if(result.getInteger("code") != 200){
+                log.error(result.getString("msg"));
+            }
+        }catch (Exception e){
+            log.error("调用智能手环平台解绑定尿酸分析仪接口失败！"+e.getMessage());
+            throw new RuntimeException("调用智能手环平台解绑定尿酸分析仪接口失败！");
+        }
+
+        //重新绑定尿酸分析仪
+        try {
+            JSONObject result  = dWatchUricApiService.bindUricDevice(userId,sn);
+            if(result.getInteger("code") != 200){
+                log.error(result.getString("msg"));
+                throw new RuntimeException(result.getString("msg"));
+            }else{
+                flag = true;
+            }
+        }catch (Exception e){
+            log.error("调用智能手环平台绑定尿酸分析仪接口失败！"+e.getMessage());
+            throw new RuntimeException("调用智能手环平台绑定尿酸分析仪接口失败！"+e.getMessage());
+        }
+
+        YxUser user = new YxUser();
+        user.setUid(userId);
+        user.setUricBind(1);//1表示已同步
+        baseMapper.updateById(user);
+        return flag;
+    }
+
+
+
+    @Override
+    public void syncUnbindUricByUserId(Long userId) throws Exception{
+        try {
+            JSONObject result  = dWatchUricApiService.unBindUricDevice(userId);
+            if(result.getInteger("code") != 200){
+                log.error(result.getString("msg"));
+            }
+        }catch (Exception e){
+            log.error("调用智能手环平台解绑定尿酸分析仪接口失败！"+e.getMessage());
+            throw new RuntimeException("调用智能手环平台解绑定尿酸分析仪接口失败！");
+        }
+    }
+
+
+
 }

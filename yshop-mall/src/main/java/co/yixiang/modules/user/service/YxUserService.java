@@ -189,5 +189,64 @@ public interface YxUserService  extends BaseService<YxUser>{
      */
     void incBrokeragePrice(BigDecimal price, Long uid);
 
+    /**
+     * 物理删除
+     * @param uid
+     */
+    void deleteByUid(Long uid);
+
+    /**
+     * 同步新增用户信息
+     * @param user
+     */
+    void syncNewUserInfo2WatchUric(YxUser user) throws Exception;
+
+
+    /**
+     * 同步更新用户信息和手环绑定信息
+     * @param user
+     */
+    void syncUpdateUserInfo2WatchUric(YxUser user) throws Exception;
+
+
+    /**
+     * 同步用户绑定手环信息到手环平台
+     * @param userId
+     * @param imei
+     * @throws Exception
+     */
+    boolean syncWatchBindInfo(Long userId,String imei) throws Exception;
+
+
+    /**
+     * 同步删除用户的绑定手环信息到手环平台
+     * @param userId
+     * @throws Exception
+     */
+    void syncDelUserWatchBindInfo(Long userId) throws Exception;
+
+    /**
+     * 同步配置手环信息
+     * @param imei
+     * @throws Exception
+     */
+    void syncWatchConfig(String imei) throws Exception;
+
+
+    /**
+     * 同步用户绑定尿酸分析仪信息到手环平台
+     * @param userId
+     * @param sn
+     * @throws Exception
+     */
+    boolean syncUricBindInfo(Long userId,String sn) throws Exception;
+
+    /**
+     * 同步用户解绑定尿酸分析仪信息到手环平台
+     * @param userId
+     * @param userId
+     * @throws Exception
+     */
+     void syncUnbindUricByUserId(Long userId) throws Exception;
 
 }

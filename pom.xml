@@ -23,7 +23,7 @@
         <module>yshop-message</module>
     </modules>
 
-    <name>后台管理系统</name>
+    <name>康泰中芯系统管理后台</name>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

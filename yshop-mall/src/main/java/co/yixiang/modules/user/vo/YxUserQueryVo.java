@@ -9,6 +9,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * <p>
@@ -59,7 +60,7 @@ public class YxUserQueryVo implements Serializable {
     private String realName;
 
     @ApiModelProperty(value = "生日")
-    private Integer birthday;
+    private Date birthday;
 
     @ApiModelProperty(value = "身份证号码")
     @JsonIgnore

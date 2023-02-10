@@ -12,6 +12,7 @@ import co.yixiang.common.mapper.CoreMapper;
 import co.yixiang.modules.user.domain.YxUser;
 import co.yixiang.modules.user.service.dto.PromUserDto;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -76,5 +77,76 @@ public interface UserMapper extends CoreMapper<YxUser> {
 
     @Update("update yx_user set brokerage_price = brokerage_price+ ${price} where uid = #{id}")
     void incBrokeragePrice(@Param("price") BigDecimal price,@Param("id") Long id);
+
+    @Delete("delete from yx_user where uid = #{uid}")
+    void deleteByUid(@Param("uid")  Long uid);
+
+    @Select("select * from yx_user where imei = #{imei} limit 1")
+    YxUser queryUserByImei(@Param("imei") String imei);
+
+
+
+    /**
+     * 根据尿酸分析仪的SN号查询关联的用户列表
+     * @param sn
+     * @return
+     */
+    @Select("select e.* from d_mdevice_device a " +
+            "inner join d_uric b on  a.did=b.id " +
+            "inner join d_mailunit c on a.mid = c.id " +
+            "inner join d_mdevice_user d on d.mid = c.id " +
+            "inner join yx_user e on d.uid=e.uid " +
+            "where a.dtype=3 and b.sn = #{sn}")
+    List<YxUser> queryUsersByUricSn(@Param("sn") String sn);
+
+
+    /**
+     * 根据跌倒报警器的IMEI查询关联人员列表
+     * @param imei
+     * @return
+     */
+    @Select("select e.* from d_mdevice_device a " +
+            "inner join d_tumble b on  a.did=b.id " +
+            "inner join d_mailunit c on a.mid = c.id " +
+            "inner join d_mdevice_user d on d.mid = c.id " +
+            "inner join yx_user e on d.uid=e.uid " +
+            "where a.dtype=1 and b.imei = #{imei}")
+    List<YxUser> queryUsersByTumbleImei(@Param("imei") String imei);
+
+
+    /**
+     * 根据跌倒报警器的IMEI查询关联主机的IMEI
+     * @param imei
+     * @return
+     */
+    @Select("select distinct c.imei from d_mdevice_device a " +
+            "inner join d_tumble b on  a.did=b.id " +
+            "inner join d_mailunit c on a.mid = c.id " +
+            "where a.dtype=1 and b.imei = #{imei}")
+    String  findMainUnitImeiByTumbleImei(@Param("imei") String imei);
+
+    /**
+     * 根据尿酸分析仪的SN查询关联主机的IMEI
+     * @param sn
+     * @return
+     */
+    @Select("select distinct c.imei from d_mdevice_device a " +
+            "            inner join d_uric b on  a.did=b.id " +
+            "            inner join d_mailunit c on a.mid = c.id  " +
+            "            where a.dtype=3 and b.sn = #{sn}")
+    String  findMainUnitImeiByUrinSn(@Param("sn") String sn);
+
+
+    /**
+     * 根据手环IMEI查询关联的主机IMEI
+     * @param imei
+     * @return
+     */
+    @Select("select distinct c.imei from d_mdevice_device a  " +
+            "            inner join d_mailunit c on a.mid = c.id " +
+            "            inner join d_mdevice_user d on d.mid = c.id " +
+            "            inner join yx_user e on d.uid=e.uid " +
+            "            where e.imei = #{imei}")
+    String fineMainUnitImeiByWatchImei(@Param("imei") String imei);
 
 }

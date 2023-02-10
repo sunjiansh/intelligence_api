@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @SpringBootApplication(exclude = {WxMaAutoConfiguration.class})
 @EnableTransactionManagement
-@MapperScan(basePackages ={"co.yixiang.modules.*.service.mapper", "co.yixiang.config"})
+@MapperScan(basePackages ={"co.yixiang.modules.*.service.mapper", "co.yixiang.modules.device.*.service.mapper", "co.yixiang.config"})
 public class AppRun {
 
     public static void main(String[] args) {
@@ -42,7 +42,7 @@ public class AppRun {
                     " \\_, //___//_//_/\\___// .__/    \n" +
                     "/___/                /_/          \n "+
 
-                    "\n意象yshop电商系统管理后台启动成功 \n官网：https://www.yixiang.co 提供技术支持ﾞ  \n");
+                    "\n管理后台启动成功 \n官网：xxxxxxxx 提供技术支持ﾞ  \n");
     }
 
     @Bean

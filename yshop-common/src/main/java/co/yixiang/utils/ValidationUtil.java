@@ -9,6 +9,9 @@ import cn.hutool.core.util.ObjectUtil;
 import co.yixiang.exception.BadRequestException;
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * 验证工具
  * @author Zheng Jie
@@ -32,4 +35,19 @@ public class ValidationUtil{
     public static boolean isEmail(String email) {
         return new EmailValidator().isValid(email, null);
     }
+
+    /**
+     * 验证手机号是否合法
+     * @return
+     */
+    public static boolean isPhoneNumber(String number){
+        String regExp = "^((13[0-9])|(15[^4])|(18[0,2,3,5-9])|(17[0-8])|(147))\\d{8}$";
+        Pattern  p = Pattern.compile(regExp);
+        Matcher m = p.matcher(number);
+        return m.matches();
+    }
+
+
+
+
 }

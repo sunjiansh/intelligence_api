@@ -33,7 +33,8 @@ public class YxUserDto implements Serializable {
     private String realName;
 
     /** 生日 */
-    private Integer birthday;
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone="GMT+8")
+    private Date birthday;
 
     /** 身份证号码 */
     private String cardId;
@@ -55,6 +56,11 @@ public class YxUserDto implements Serializable {
 
     /** 手机号码 */
     private String phone;
+
+    /**
+     * 性别 0：女 1：男  2：未知
+     */
+    private Integer sex;
 
     /** 添加时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
@@ -108,4 +114,43 @@ public class YxUserDto implements Serializable {
 
     /** 用户登陆类型，h5,wechat,routine */
     private String loginType;
+
+
+    /**
+     * 绑定的智能手环IMEI号
+     */
+    private String imei;
+
+    /**
+     * 是否已同步手环信息到手环平台，0 未同步 1 已同步
+     */
+    private Integer watchBind;
+
+
+    /**
+     * 绑定的尿酸分析仪SN号
+     */
+    private String uricSn;
+
+    /**
+     * 是否已同步尿酸分析仪信息到手环平台，0 未同步 1 已同步
+     */
+    private Integer uricBind;
+
+
+    /**
+     * 会员服务开始日期
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone="GMT+8")
+    private Date serviceStart;
+
+    /**
+     * 会员服务结束日期
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone="GMT+8")
+    private Date serviceEnd;
+
+
+
+
 }

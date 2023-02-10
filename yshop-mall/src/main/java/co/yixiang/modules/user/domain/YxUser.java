@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -61,7 +62,8 @@ public class YxUser extends BaseDomain {
 
 
     /** 生日 */
-    private Integer birthday;
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone="GMT+8")
+    private Date birthday;
 
 
     /** 身份证号码 */
@@ -82,6 +84,11 @@ public class YxUser extends BaseDomain {
 
     /** 用户昵称 */
     private String nickname;
+
+    /**
+     * 性别 0：女 1：男  2：未知
+     */
+    private Integer sex;
 
 
     /** 用户头像 */
@@ -161,6 +168,43 @@ public class YxUser extends BaseDomain {
 
     /** 用户登陆类型，h5,wechat,routine */
     private String loginType;
+
+
+    /**
+     * 绑定的智能手环IMEI号
+     */
+    private String imei;
+
+    /**
+     * 会员服务开始日期
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone="GMT+8")
+    private Date serviceStart;
+
+    /**
+     * 会员服务结束日期
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone="GMT+8")
+    private Date serviceEnd;
+
+
+    /**
+     * 是否已同步手环信息到手环平台，0 未同步 1 已同步
+     */
+    private Integer watchBind;
+
+
+
+    /**
+     * 绑定的尿酸分析仪SN号
+     */
+    private String uricSn;
+
+    /**
+     * 是否已同步尿酸分析仪信息到手环平台，0 未同步 1 已同步
+     */
+    private Integer uricBind;
+
 
     /** 微信用户json信息 */
     @TableField(typeHandler = FastjsonTypeHandler.class)
