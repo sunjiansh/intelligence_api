@@ -46,7 +46,6 @@ public class DataReportController {
     }
 
 
-
     /**
      * 暴露给外部地址 http://sunjiansh.nat123.cc:53750/report
      * 用于接受手环和尿酸检测仪上报数据是的回调
