@@ -7,8 +7,11 @@ import co.yixiang.modules.device.mqtt.ServerMQTT;
 import co.yixiang.modules.device.tumble.service.mapper.DTumbleMapper;
 import co.yixiang.modules.device.tumbledatarecords.domain.DTumbleDataRecords;
 import co.yixiang.modules.device.tumbledatarecords.service.mapper.DTumbleDataRecordsMapper;
+import co.yixiang.modules.servermanage.sosrecord.domain.SVipSosRecord;
+import co.yixiang.modules.servermanage.sosrecord.service.SVipSosRecordService;
 import co.yixiang.modules.user.domain.YxUser;
 import co.yixiang.modules.user.service.mapper.UserMapper;
+import co.yixiang.utils.DateUtils;
 import co.yixiang.utils.SpringContextHolder;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +31,7 @@ public class DTumbleDataRecordHandleThread implements Runnable{
     private DTumbleDataRecordsMapper dTumbleDataRecordsMapper = (DTumbleDataRecordsMapper) SpringContextHolder.getBean(DTumbleDataRecordsMapper.class);
     private UserMapper yxUserMapper = (UserMapper) SpringContextHolder.getBean(UserMapper.class);
     private DTumbleMapper dTumbleMapper =  (DTumbleMapper) SpringContextHolder.getBean(DTumbleMapper.class);
-
+    private SVipSosRecordService sVipSosRecordService = (SVipSosRecordService) SpringContextHolder.getBean(SVipSosRecordService.class);
 
     private JSONObject json;
 
@@ -163,7 +166,35 @@ public class DTumbleDataRecordHandleThread implements Runnable{
             }catch (Exception e){
                 e.printStackTrace();
             }
+
+            //TODO 保存一条报警信息,这个逻辑应该放在SOS报警的地方
+            YxUser user  = yxUserMapper.selectById(records.getUserId());
+            SVipSosRecord sVipSosRecord = new SVipSosRecord();
+            Date now = new Date();
+            sVipSosRecord.setMemberId(user.getUid());
+            sVipSosRecord.setMemberName(user.getRealName());
+            sVipSosRecord.setMemberPhone(user.getPhone());
+            sVipSosRecord.setSosTime(now);
+            sVipSosRecord.setServiceEndTime(user.getServiceEnd());
+            sVipSosRecord.setSosContact(user.getSosContact());
+            if(user.getServiceEnd() != null){
+                if(now.before(user.getServiceEnd())){
+                    int days = DateUtils.differentDaysByMillisecond(now,user.getServiceEnd());
+                    sVipSosRecord.setLastDays(days > 0?days:0);
+                }else{
+                    sVipSosRecord.setLastDays(0);
+                }
+            }
+            try {
+                sVipSosRecordService.save(sVipSosRecord);
+            }catch (Exception e){
+                log.error("保存SOS报警记录失败！"+e.getMessage());
+            }
+
         }
+
+
+
 
 
       if("1".equals(records.getFallDownAlarm())){
