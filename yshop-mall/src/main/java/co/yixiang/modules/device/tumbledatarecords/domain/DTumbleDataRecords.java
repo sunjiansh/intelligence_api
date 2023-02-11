@@ -135,9 +135,9 @@ public class DTumbleDataRecords  {
      */
     private String appData;
 
+    private String imsi;
 
-
-
+    private String iccid;
 
 
 

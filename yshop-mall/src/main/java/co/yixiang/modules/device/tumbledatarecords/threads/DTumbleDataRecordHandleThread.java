@@ -128,13 +128,24 @@ public class DTumbleDataRecordHandleThread implements Runnable{
                 saveHbInfo(records,mainUnitImei);
                 break;
             case REGISTER:
-                //
+                saveRegisterInfo(records,mainUnitImei);
                 break;
         }
     }
 
 
+    private void saveRegisterInfo(DTumbleDataRecords records, String mainUnitImei){
+        APPdataUtil.parseRegisterData(records,records.getAppData());
 
+        //更新imsi、iccid信息到 跌倒报警器设备维护表
+        try {
+            dTumbleMapper.updateIccidByImei(records.getImsi(),records.getIccid(),records.getImei());
+        }catch (Exception e){
+            log.error("更新跌倒报警器设备维护表失败！"+e.getMessage());
+        }
+
+        dTumbleDataRecordsMapper.insert(records);
+    }
 
     private void saveAlarmInfo(DTumbleDataRecords records, String mainUnitImei ){
         APPdataUtil.parseAlarmData(records,records.getAppData());
