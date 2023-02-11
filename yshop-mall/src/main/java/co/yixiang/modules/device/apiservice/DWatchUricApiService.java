@@ -111,7 +111,7 @@ public class DWatchUricApiService {
      * @return
      * @throws Exception
      */
-    public JSONObject configWatch(String imei) throws Exception{
+    public JSONObject configWatchSleepInfo(String imei) throws Exception{
         OkHttpClient client = new OkHttpClient();
         MediaType mediaType = MediaType.parse("application/json");
         JSONObject bodyJson = new JSONObject();
@@ -131,6 +131,42 @@ public class DWatchUricApiService {
         RequestBody body = RequestBody.create(mediaType, bodyJson.toJSONString());
 
      //   RequestBody body = RequestBody.create(mediaType, "{\r\n    \"userConfig\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"sleepSwitch\":1,\r\n        \"sleepTimeStart\":\"23:00\",\r\n        \"sleepTimeEnd\":\"08:00\"\r\n    },\r\n    \"sendBody\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"cmd\":\"BP96\"\r\n    }\r\n}");
+        Request request = new Request.Builder()
+                .url("https://api-xintai-beta.colofoo.com/openapi/device/updateConfig")
+                .post(body)
+                .addHeader("appId", appId)
+                .addHeader("appSecret", appSecret)
+                .addHeader("content-type", "application/json")
+                .build();
+        Response response = client.newCall(request).execute();
+        JSONObject jsonResult = (JSONObject) JSONObject.parse(response.body().string());
+        System.out.println(jsonResult);
+        return jsonResult;
+    }
+
+    /**
+     * 初始化配置手表sos信息
+     * @param imei
+     * @return
+     * @throws Exception
+     */
+    public JSONObject configWatchSOSInfo(String imei,String sos) throws Exception{
+        OkHttpClient client = new OkHttpClient();
+        MediaType mediaType = MediaType.parse("application/json");
+        JSONObject bodyJson = new JSONObject();
+        JSONObject userConfig = new JSONObject();
+        JSONObject sendBody = new JSONObject();
+
+        userConfig.put("imei",imei);
+        userConfig.put("sos",sos);//sos号码，最多3个，sos无更新，通过覆盖来设置sos号码。空字符串 代表移除所有设置sos号码
+
+        sendBody.put("imei",imei);
+        sendBody.put("cmd","BP12");//SOS号码设置指令，
+
+        bodyJson.put("userConfig",userConfig);
+        bodyJson.put("sendBody",sendBody);
+        RequestBody body = RequestBody.create(mediaType, bodyJson.toJSONString());
+
         Request request = new Request.Builder()
                 .url("https://api-xintai-beta.colofoo.com/openapi/device/updateConfig")
                 .post(body)

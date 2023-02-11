@@ -32,6 +32,7 @@ import co.yixiang.modules.product.vo.YxStoreProductQueryVo;
 import co.yixiang.modules.shop.domain.YxSystemUserLevel;
 import co.yixiang.modules.shop.service.YxSystemConfigService;
 import co.yixiang.modules.shop.service.YxSystemStoreStaffService;
+import co.yixiang.modules.user.domain.ViewYxUserBindAvailable;
 import co.yixiang.modules.user.domain.YxUser;
 import co.yixiang.modules.user.domain.YxUserLevel;
 import co.yixiang.modules.user.service.YxSystemUserLevelService;
@@ -44,6 +45,7 @@ import co.yixiang.modules.user.service.dto.YxUserDto;
 import co.yixiang.modules.user.service.dto.YxUserQueryCriteria;
 import co.yixiang.modules.user.service.mapper.UserBillMapper;
 import co.yixiang.modules.user.service.mapper.UserMapper;
+import co.yixiang.modules.user.service.mapper.ViewYXuserBindAvailableMapper;
 import co.yixiang.modules.user.vo.YxUserQueryVo;
 import co.yixiang.utils.FileUtil;
 import co.yixiang.utils.StringUtils;
@@ -89,6 +91,8 @@ public class YxUserServiceImpl extends BaseServiceImpl<UserMapper, YxUser> imple
     private StoreOrderMapper storeOrderMapper;
     @Autowired
     private UserBillMapper userBillMapper;
+    @Autowired
+    private ViewYXuserBindAvailableMapper viewYXuserBindAvailableMapper;
 
 
     @Autowired
@@ -603,6 +607,19 @@ public class YxUserServiceImpl extends BaseServiceImpl<UserMapper, YxUser> imple
         return baseMapper.selectList(QueryHelpPlus.getPredicate(YxUser.class, criteria));
     }
 
+    public List<YxUser> queryAllBindAvailable(YxUserQueryCriteria criteria){
+        return viewYXuserBindAvailableMapper.selectList(QueryHelpPlus.getPredicate(ViewYxUserBindAvailable.class, criteria));
+    }
+
+    public Map<String, Object> queryAllBindAvailablePage(YxUserQueryCriteria criteria, Pageable pageable){
+        getPage(pageable);
+        PageInfo<YxUser> page = new PageInfo<>(queryAllBindAvailable(criteria));
+        Map<String, Object> map = new LinkedHashMap<>(2);
+        map.put("content", generator.convert(page.getList(), YxUserDto.class));
+        map.put("totalElements", page.getTotal());
+        return map;
+    }
+
 
     @Override
     public void download(List<YxUserDto> all, HttpServletResponse response) throws IOException {
@@ -812,19 +829,33 @@ public class YxUserServiceImpl extends BaseServiceImpl<UserMapper, YxUser> imple
 
 
     @Override
-    public void syncWatchConfig(String imei) throws Exception {
+    public void syncWatchSleepConfig(String imei) throws Exception {
         if(StringUtils.isNotEmpty(imei)){
             //配置手环
             try {
-                JSONObject result  = dWatchUricApiService.configWatch(imei);
+                JSONObject result  = dWatchUricApiService.configWatchSleepInfo(imei);
                 if(result.getInteger("code") != 200){
                     log.error(result.getString("msg"));
                     throw new RuntimeException(result.getString("msg"));
                 }
             }catch (Exception e){
-                log.error("调用智能手环平台配置手表接口失败！"+e.getMessage());
-                throw new RuntimeException("调用智能手环平台配置手表接口失败！"+e.getMessage());
+                log.error("调用智能手环平台配置手表睡眠监测接口失败！"+e.getMessage());
+                throw new RuntimeException("调用智能手环平台配置手表睡眠监测接口失败！"+e.getMessage());
             }
+        }
+    }
+
+    @Override
+    public void syncWatchSOSConfig(String imei, String sos) throws Exception {
+        try {
+            JSONObject result  = dWatchUricApiService.configWatchSOSInfo(imei,sos);
+            if(result.getInteger("code") != 200){
+                log.error(result.getString("msg"));
+                throw new RuntimeException(result.getString("msg"));
+            }
+        }catch (Exception e){
+            log.error("调用智能手环平台配置手表SOS接口失败！"+e.getMessage());
+            throw new RuntimeException("调用智能手环平台配置手表SOS接口失败！"+e.getMessage());
         }
     }
 

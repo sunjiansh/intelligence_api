@@ -206,6 +206,12 @@ public class YxUser extends BaseDomain {
     private Integer uricBind;
 
 
+    /**
+     * 紧急联系人电话号码，多个用英文“，”隔开
+     */
+    private String sosContact;
+
+
     /** 微信用户json信息 */
     @TableField(typeHandler = FastjsonTypeHandler.class)
     private WechatUserDto wxProfile;

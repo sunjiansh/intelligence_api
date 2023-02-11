@@ -137,6 +137,10 @@ public class YxUserDto implements Serializable {
      */
     private Integer uricBind;
 
+    /**
+     * 紧急联系人电话号码，多个用英文“，”隔开
+     */
+    private String sosContact;
 
     /**
      * 会员服务开始日期

@@ -155,6 +155,15 @@ public interface YxUserService  extends BaseService<YxUser>{
     Map<String,Object> queryAll(YxUserQueryCriteria criteria, Pageable pageable);
 
     /**
+     * 查询可绑定的数据分页
+     * @param criteria 条件
+     * @param pageable 分页参数
+     * @return Map<String,Object>
+     */
+    Map<String,Object> queryAllBindAvailablePage(YxUserQueryCriteria criteria, Pageable pageable);
+
+
+    /**
     * 查询所有数据不分页
     * @param criteria 条件参数
     * @return List<YxUserDto>
@@ -226,12 +235,19 @@ public interface YxUserService  extends BaseService<YxUser>{
     void syncDelUserWatchBindInfo(Long userId) throws Exception;
 
     /**
-     * 同步配置手环信息
+     * 同步配置手环睡眠监测信息
      * @param imei
      * @throws Exception
      */
-    void syncWatchConfig(String imei) throws Exception;
+    void syncWatchSleepConfig(String imei) throws Exception;
 
+    /**
+     * 同步配置手环SOS联系人
+     * @param imie
+     * @param sos
+     * @throws Exception
+     */
+    void syncWatchSOSConfig(String imie,String sos) throws Exception;
 
     /**
      * 同步用户绑定尿酸分析仪信息到手环平台

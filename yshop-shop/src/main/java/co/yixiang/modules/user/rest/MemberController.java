@@ -84,7 +84,12 @@ public class MemberController {
     public ResponseEntity getYxUsers(YxUserQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(yxUserService.queryAll(criteria,pageable),HttpStatus.OK);
     }
-
+    @Log("查询可绑定用户")
+    @ApiOperation(value = "查询可绑定用户")
+    @GetMapping(value = "/yxUser/bindAvailable")
+    public ResponseEntity getYxUsersBindAvailable(YxUserQueryCriteria criteria, Pageable pageable){
+        return new ResponseEntity<>(yxUserService.queryAllBindAvailablePage(criteria,pageable),HttpStatus.OK);
+    }
 
 
     @Log("新增用户")
@@ -237,6 +242,13 @@ public class MemberController {
         }catch (Exception e){
             throw new BadRequestException("同步失败！"+e.getMessage());
         }
+
+        try {
+            yxUserService.syncWatchSOSConfig(resources.getImei(),resources.getSosContact());
+        }catch (Exception e){
+            throw new BadRequestException("同步失败！"+e.getMessage());
+        }
+
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
