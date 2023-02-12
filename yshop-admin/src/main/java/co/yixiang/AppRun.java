@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @SpringBootApplication(exclude = {WxMaAutoConfiguration.class})
 @EnableTransactionManagement
-@MapperScan(basePackages ={"co.yixiang.modules.*.service.mapper", "co.yixiang.modules.device.*.service.mapper", "co.yixiang.config"})
+@MapperScan(basePackages ={"co.yixiang.modules.*.service.mapper", "co.yixiang.modules.*.*.service.mapper", "co.yixiang.config"})
 public class AppRun {
 
     public static void main(String[] args) {

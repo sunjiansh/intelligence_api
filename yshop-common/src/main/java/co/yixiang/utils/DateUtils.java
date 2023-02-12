@@ -151,4 +151,16 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         String dateString = format.format(date);
         return dateString;
     }
+
+    /**
+     * 计算两个日期之间相差几天
+     * @param start
+     * @param end
+     * @return
+     */
+    public static int differentDaysByMillisecond(Date start,Date end) {
+        int days = (int) ((end.getTime() - start.getTime()) / (1000*3600*24));
+        return days;
+    }
+
 }

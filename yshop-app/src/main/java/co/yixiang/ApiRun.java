@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableAsync
 @EnableTransactionManagement
 @EnableCaching
-@MapperScan(basePackages ={"co.yixiang.modules.*.service.mapper", "co.yixiang.modules.device.*.service.mapper","co.yixiang.config"})
+@MapperScan(basePackages ={"co.yixiang.modules.*.service.mapper", "co.yixiang.modules.*.*.service.mapper","co.yixiang.config"})
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class , WxMaAutoConfiguration.class})
 public class ApiRun {
 
