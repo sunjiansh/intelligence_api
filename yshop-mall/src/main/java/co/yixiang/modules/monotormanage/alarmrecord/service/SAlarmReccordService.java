@@ -6,13 +6,11 @@
 * 购买后可获得全部源代码（禁止转卖、分享、上传到码云、github等开源平台）
 * 一经发现盗用、分享等行为，将追究法律责任，后果自负
 */
-package co.yixiang.modules.monotormanage.geography.service;
+package co.yixiang.modules.monotormanage.alarmrecord.service;
 import co.yixiang.common.service.BaseService;
-import co.yixiang.modules.device.watchuricdatarecords.domain.ViewDeviceLocation;
-import co.yixiang.modules.monotormanage.geography.domain.SGeography;
-import co.yixiang.modules.monotormanage.geography.service.dto.SGeographyDto;
-import co.yixiang.modules.monotormanage.geography.service.dto.SGeographyQueryCriteria;
-import co.yixiang.modules.user.domain.YxUser;
+import co.yixiang.modules.monotormanage.alarmrecord.domain.SAlarmReccord;
+import co.yixiang.modules.monotormanage.alarmrecord.service.dto.SAlarmReccordDto;
+import co.yixiang.modules.monotormanage.alarmrecord.service.dto.SAlarmReccordQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import java.util.Map;
 import java.util.List;
@@ -21,9 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 import co.yixiang.domain.PageResult;
 /**
 * @author jiansun
-* @date 2023-02-12
+* @date 2023-02-13
 */
-public interface SGeographyService  extends BaseService<SGeography>{
+public interface SAlarmReccordService  extends BaseService<SAlarmReccord>{
 
     /**
     * 查询数据分页
@@ -31,14 +29,14 @@ public interface SGeographyService  extends BaseService<SGeography>{
     * @param pageable 分页参数
     * @return Map<String,Object>
     */
-    PageResult<SGeographyDto>  queryAll(SGeographyQueryCriteria criteria, Pageable pageable);
+    PageResult<SAlarmReccordDto>  queryAll(SAlarmReccordQueryCriteria criteria, Pageable pageable);
 
     /**
     * 查询所有数据不分页
     * @param criteria 条件参数
-    * @return List<SGeographyDto>
+    * @return List<SAlarmReccordDto>
     */
-    List<SGeography> queryAll(SGeographyQueryCriteria criteria);
+    List<SAlarmReccord> queryAll(SAlarmReccordQueryCriteria criteria);
 
     /**
     * 导出数据
@@ -46,12 +44,5 @@ public interface SGeographyService  extends BaseService<SGeography>{
     * @param response /
     * @throws IOException /
     */
-    void download(List<SGeographyDto> all, HttpServletResponse response) throws IOException;
-
-    /**
-     * 查询设备定位列表
-     * @return
-     */
-    List<ViewDeviceLocation> queryDeviceLocationList();
-
+    void download(List<SAlarmReccordDto> all, HttpServletResponse response) throws IOException;
 }

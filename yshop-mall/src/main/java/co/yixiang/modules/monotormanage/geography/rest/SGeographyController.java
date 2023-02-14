@@ -12,10 +12,14 @@ import java.util.Arrays;
 import ch.qos.logback.core.util.LocationUtil;
 import co.yixiang.dozer.service.IGenerator;
 import co.yixiang.exception.BadRequestException;
+import co.yixiang.modules.device.watchuricdatarecords.domain.ViewDeviceLocation;
+import co.yixiang.modules.user.domain.YxUser;
+import co.yixiang.modules.user.service.YxUserService;
 import co.yixiang.utils.location.GetTencentLocationVO;
 import co.yixiang.utils.location.LocationUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.AllArgsConstructor;
 import co.yixiang.modules.logging.aop.log.Log;
 import co.yixiang.modules.monotormanage.geography.domain.SGeography;
@@ -31,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import co.yixiang.domain.PageResult;
 /**
@@ -45,6 +50,7 @@ public class SGeographyController {
 
     private final SGeographyService sGeographyService;
     private final IGenerator generator;
+    private final YxUserService yxUserService;
 
 
     @Log("导出数据")
@@ -115,5 +121,24 @@ public class SGeographyController {
         }
         return new ResponseEntity(result.getResult(),HttpStatus.OK);
     }
+
+
+    @GetMapping(value = "/getDeviceLocationList")
+    @Log("查询设备定位信息列表")
+    @ApiOperation("查询设备定位信息列表")
+    public ResponseEntity<Object> getDeviceLocationList(){
+        List<ViewDeviceLocation> list = sGeographyService.queryDeviceLocationList();
+        return new ResponseEntity<>(list,HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getUserInfoByImei/{imei}")
+    @Log("根据IMEI查询设备定位信息")
+    @ApiOperation("根据IMEI查询设备定位信息")
+    public ResponseEntity<Object> getUserInfoByImei(@PathVariable("imei") String imei){
+        YxUser user = yxUserService.getOne(new LambdaQueryWrapper<YxUser>().eq(YxUser::getImei,imei));
+        return new ResponseEntity<>(user,HttpStatus.OK);
+    }
+
+
 
 }

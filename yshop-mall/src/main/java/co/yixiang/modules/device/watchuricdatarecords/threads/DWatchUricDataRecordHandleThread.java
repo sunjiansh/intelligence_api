@@ -1,19 +1,28 @@
 package co.yixiang.modules.device.watchuricdatarecords.threads;
 
 import co.yixiang.common.enums.WatchUricCmdEnum;
+import co.yixiang.common.util.GeographyCalc;
 import co.yixiang.modules.device.apiservice.DWatchUricApiService;
 import co.yixiang.modules.device.mqtt.ServerMQTT;
 import co.yixiang.modules.device.watchuricdatarecords.domain.DWatchUricDataRecords;
 import co.yixiang.modules.device.watchuricdatarecords.service.mapper.DWatchUricDataRecordsMapper;
+import co.yixiang.modules.monotormanage.alarmrecord.domain.SAlarmReccord;
+import co.yixiang.modules.monotormanage.alarmrecord.service.SAlarmReccordService;
+import co.yixiang.modules.monotormanage.geography.domain.SGeography;
+import co.yixiang.modules.monotormanage.geography.service.SGeographyService;
 import co.yixiang.modules.user.domain.YxUser;
 import co.yixiang.modules.user.service.YxUserService;
 import co.yixiang.modules.user.service.mapper.UserMapper;
 import co.yixiang.utils.SpringContextHolder;
+import co.yixiang.utils.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author 38294
@@ -27,8 +36,8 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 	private UserMapper yxUserMapper = (UserMapper)SpringContextHolder.getBean(UserMapper.class);
 	private YxUserService yxUserService =  (YxUserService)SpringContextHolder.getBean(YxUserService.class);
 	private  DWatchUricApiService dWatchUricApiService = (DWatchUricApiService)SpringContextHolder.getBean(DWatchUricApiService.class);
-
-
+	private SAlarmReccordService sAlarmReccordService = (SAlarmReccordService)SpringContextHolder.getBean(SAlarmReccordService.class);
+	private SGeographyService sGeographyService = (SGeographyService)SpringContextHolder.getBean(SGeographyService.class);
 
 	private JSONObject json;
 
@@ -112,6 +121,7 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 				break;
 			case CZW07://自动上传位置信息
 				saveLocationInfo(entity,json,mainUnitImei);
+				handleAlarmInfo(entity);
 				break;
 			case CZW30://自动上传围栏通知
 				saveWLInfo(entity,json,mainUnitImei);
@@ -269,6 +279,7 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 		}
 
 		dWatchUricDataRecordsMapper.insert(entity);
+
 	}
 	/**
 	 *  save 经纬度
@@ -277,6 +288,9 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 	private void saveLocationInfo(DWatchUricDataRecords entity,JSONObject json,String  mainUnitImei){
 		//0 为自动测量数据
 		entity.setMeasureMode(0);
+		String[] lo = json.getString("location").split(",");
+		entity.setLat(Double.parseDouble(lo[1]));
+		entity.setLon(Double.parseDouble(lo[0]));
 		entity.setLocation(json.getString("location"));
 		entity.setLocationDesc(json.getString("desc"));
 		entity.setType(json.getString("type"));
@@ -340,5 +354,39 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 		entity.setRecordTime(json.getLong("recordTime"));
 		dWatchUricDataRecordsMapper.insert(entity);
 	}
+
+
+	private void handleAlarmInfo(DWatchUricDataRecords entity){
+			String location =	entity.getLocation();
+			String[] latLng = location.split(",");
+			Double lon = Double.parseDouble(latLng[0]);
+		    Double lat = Double.parseDouble(latLng[1]);
+		    YxUser user = yxUserMapper.selectById(entity.getUserId());
+			List<SGeography> nets = sGeographyService.list(new LambdaQueryWrapper<SGeography>().eq(SGeography::getMemberId,entity.getUserId()));
+			if(nets != null && nets.size() > 0){
+				Set<Boolean> results = new HashSet<>();
+				StringBuilder content = new StringBuilder();
+				content.append("用户脱离围栏：");
+				nets.stream().forEach(sGeography -> content.append(sGeography.getName()).append(","));
+				for(SGeography sGeography :nets){
+					boolean isIncIrcle = GeographyCalc.isInCircle(lat,lon,sGeography.getLat(),sGeography.getLon(),sGeography.getRegionRange());
+					results.add(isIncIrcle);
+				}
+				//遍历每个围栏，如果都不在这几个围栏中则报警
+				if(!results.contains(true)){
+					SAlarmReccord alarmReccord = new SAlarmReccord();
+					alarmReccord.setMemberId(user.getUid());
+					alarmReccord.setMenberName(user.getRealName());
+					alarmReccord.setPhone(user.getPhone());
+					alarmReccord.setAlarmType(1);//报警类型1 围栏报警 2 风险分级
+					alarmReccord.setImei(entity.getImei());
+					alarmReccord.setContent(content.toString());
+					alarmReccord.setCreateTime(new Date());
+					sAlarmReccordService.save(alarmReccord);
+				}
+			}
+	}
+
+
 
 }

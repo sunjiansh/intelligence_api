@@ -8,6 +8,8 @@
 */
 package co.yixiang.modules.monotormanage.geography.service.impl;
 
+import co.yixiang.modules.device.watchuricdatarecords.domain.ViewDeviceLocation;
+import co.yixiang.modules.device.watchuricdatarecords.service.mapper.ViewDeviceLocationMapper;
 import co.yixiang.modules.monotormanage.geography.domain.SGeography;
 import co.yixiang.common.service.impl.BaseServiceImpl;
 import lombok.AllArgsConstructor;
@@ -34,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.text.View;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import co.yixiang.domain.PageResult;
@@ -48,6 +51,7 @@ import co.yixiang.domain.PageResult;
 public class SGeographyServiceImpl extends BaseServiceImpl<SGeographyMapper, SGeography> implements SGeographyService {
 
     private final IGenerator generator;
+    private final ViewDeviceLocationMapper viewDeviceLocationMapper;
 
     @Override
     //@Cacheable
@@ -83,5 +87,12 @@ public class SGeographyServiceImpl extends BaseServiceImpl<SGeographyMapper, SGe
             list.add(map);
         }
         FileUtil.downloadExcel(list, response);
+    }
+
+
+    @Override
+    public List<ViewDeviceLocation> queryDeviceLocationList() {
+        List<ViewDeviceLocation> list = viewDeviceLocationMapper.selectList(null);
+        return list;
     }
 }

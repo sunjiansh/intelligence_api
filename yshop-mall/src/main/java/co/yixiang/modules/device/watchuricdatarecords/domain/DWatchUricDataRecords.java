@@ -137,6 +137,16 @@ public class DWatchUricDataRecords  {
     //血糖、尿酸检测 1：空腹测量 2：餐后2小时测量 3：餐前测量 4：其它测量时间
     private Integer timePeriod;
 
+    /**
+     * 纬度
+     */
+    private Double lat;
+
+    /**
+     * 经度
+     */
+    private Double lon;
+
 
     public void copy(DWatchUricDataRecords source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
