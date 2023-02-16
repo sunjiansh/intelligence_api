@@ -21,6 +21,9 @@ public class ViewDeviceLocation  {
     @TableId
     private Long id;
 
+
+    String avatar;
+
     private String realName;
 
     private String phone;
