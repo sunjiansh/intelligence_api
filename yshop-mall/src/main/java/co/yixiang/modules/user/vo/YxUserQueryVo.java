@@ -2,6 +2,7 @@ package co.yixiang.modules.user.vo;
 
 
 import co.yixiang.modules.order.vo.UserOrderCountVo;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -138,5 +139,47 @@ public class YxUserQueryVo implements Serializable {
 
     @ApiModelProperty(value = "会员名称")
     private String vipName;
+
+
+    /**
+     * 绑定的智能手环IMEI号
+     */
+    private String imei;
+
+    /**
+     * 会员服务开始日期
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone="GMT+8")
+    private Date serviceStart;
+
+    /**
+     * 会员服务结束日期
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone="GMT+8")
+    private Date serviceEnd;
+
+
+    /**
+     * 是否已同步手环信息到手环平台，0 未同步 1 已同步
+     */
+    private Integer watchBind;
+
+
+
+    /**
+     * 绑定的尿酸分析仪SN号
+     */
+    private String uricSn;
+
+    /**
+     * 是否已同步尿酸分析仪信息到手环平台，0 未同步 1 已同步
+     */
+    private Integer uricBind;
+
+
+    /**
+     * 紧急联系人电话号码，多个用英文“，”隔开
+     */
+    private String sosContact;
 
 }

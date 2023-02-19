@@ -187,7 +187,7 @@ public class DTumbleApiService {
      * @return
      * @throws Exception
      */
-    public static JSONObject configHeight(String deviceId,Integer productId,Integer height) throws Exception{
+    public static JSONObject configHeight(String deviceId,String productId,Integer height) throws Exception{
             //AA550D04090818010000000000003B
             String cmdTemplate = "0D040908{PARAM}00000000";
             String height_hex = HexUtil.decToHex(height);
