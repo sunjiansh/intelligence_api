@@ -213,4 +213,55 @@ public class HexUtil {
         return sHex;
     }
 
+
+    public static String getUnicodeName(String name){
+        String newname = string2Unicode(name);
+        return newname.replace("\\u","").toUpperCase();
+    }
+
+
+
+    /**
+     * 中文转unicode
+     * @param ss
+     * @return
+     */
+    public static String string2Unicode(final String ss) {
+        char[] utfBytes = ss.toCharArray();
+        String unicodeBytes = "";
+        for (int i = 0; i < utfBytes.length; i++) {
+            String hexB = Integer.toHexString(utfBytes[i]);
+            if (hexB.length() <= 2) {
+                hexB = "00" + hexB;
+            }
+            unicodeBytes = unicodeBytes + "\\u" + hexB;
+        }
+        return unicodeBytes;
+    }
+
+    /*
+     * unicode编码转中文
+     */
+    public static String decodeUnicode(String code) {
+        int start = 0;
+        int end = 0;
+        final StringBuffer buffer = new StringBuffer();
+        while (start > -1) {
+            end = code.indexOf("\\u", start + 2);
+            String charStr = "";
+            if (end == -1) {
+                charStr = code.substring(start + 2, code.length());
+            } else {
+                charStr = code.substring(start + 2, end);
+            }
+            char letter = (char) Integer.parseInt(charStr, 16); // 16进制parse整形字符串。
+            buffer.append(new Character(letter).toString());
+            start = end;
+        }
+        return buffer.toString();
+    }
+
+
+
+
 }

@@ -1,5 +1,6 @@
 package co.yixiang.modules.device.apiservice;
 
+import co.yixiang.common.util.HexUtil;
 import co.yixiang.modules.device.watchuricdatarecords.domain.DWatchUricDataRecords;
 import co.yixiang.modules.user.domain.YxUser;
 import com.alibaba.fastjson.JSONArray;
@@ -180,6 +181,202 @@ public class DWatchUricApiService {
         return jsonResult;
     }
 
+
+    /**
+     * 配置体温上报时间间隔信息
+     * @param imei
+     * @param wdstart
+     * @return
+     * @throws Exception
+     */
+    public JSONObject configWatchTemperature(String imei,Integer wdstart) throws Exception{
+        OkHttpClient client = new OkHttpClient();
+        MediaType mediaType = MediaType.parse("application/json");
+        JSONObject bodyJson = new JSONObject();
+        JSONObject userConfig = new JSONObject();
+        JSONObject sendBody = new JSONObject();
+
+        userConfig.put("imei",imei);
+        userConfig.put("wdstart",wdstart);
+
+        sendBody.put("imei",imei);
+        sendBody.put("cmd","BP87");//体温上传设置指令，
+
+        bodyJson.put("userConfig",userConfig);
+        bodyJson.put("sendBody",sendBody);
+        RequestBody body = RequestBody.create(mediaType, bodyJson.toJSONString());
+
+        Request request = new Request.Builder()
+                .url("https://api-xintai-beta.colofoo.com/openapi/device/updateConfig")
+                .post(body)
+                .addHeader("appId", appId)
+                .addHeader("appSecret", appSecret)
+                .addHeader("content-type", "application/json")
+                .build();
+        Response response = client.newCall(request).execute();
+        JSONObject jsonResult = (JSONObject) JSONObject.parse(response.body().string());
+        System.out.println(jsonResult);
+        return jsonResult;
+    }
+
+    /**
+     * 配置心率、血压、血氧、血糖上传频率(单位秒,连续上传时最小时间不小于 300 秒，最大不超过 65535)0：关闭 1：单次上传
+     * @param imei
+     * @param bldstart
+     * @return
+     * @throws Exception
+     */
+    public JSONObject configWatchHr(String imei,Integer bldstart) throws Exception{
+        OkHttpClient client = new OkHttpClient();
+        MediaType mediaType = MediaType.parse("application/json");
+        JSONObject bodyJson = new JSONObject();
+        JSONObject userConfig = new JSONObject();
+        JSONObject sendBody = new JSONObject();
+
+        userConfig.put("imei",imei);
+        userConfig.put("bldstart",bldstart);
+
+        sendBody.put("imei",imei);
+        sendBody.put("cmd","BP86");//设置心率/血压/血氧/血糖测量周期 上传设置指令，
+
+        bodyJson.put("userConfig",userConfig);
+        bodyJson.put("sendBody",sendBody);
+        RequestBody body = RequestBody.create(mediaType, bodyJson.toJSONString());
+
+        Request request = new Request.Builder()
+                .url("https://api-xintai-beta.colofoo.com/openapi/device/updateConfig")
+                .post(body)
+                .addHeader("appId", appId)
+                .addHeader("appSecret", appSecret)
+                .addHeader("content-type", "application/json")
+                .build();
+        Response response = client.newCall(request).execute();
+        JSONObject jsonResult = (JSONObject) JSONObject.parse(response.body().string());
+        System.out.println(jsonResult);
+        return jsonResult;
+    }
+
+
+
+    /**
+     * 配置睡眠开关和监测时间
+     * @param imei
+     * @param sleepTimeStart
+     * @param sleepTimeEnd
+     * @return JSONObject
+     * @throws Exception
+     */
+    public JSONObject configWatchSleep(String imei, String sleepTimeStart,String  sleepTimeEnd) throws Exception{
+        OkHttpClient client = new OkHttpClient();
+        MediaType mediaType = MediaType.parse("application/json");
+        JSONObject bodyJson = new JSONObject();
+        JSONObject userConfig = new JSONObject();
+        JSONObject sendBody = new JSONObject();
+
+        userConfig.put("imei",imei);
+        userConfig.put("sleepSwitch",1);//睡眠监测开关打开。0是关闭
+        userConfig.put("sleepTimeStart",sleepTimeStart);//必须是"23:00"这种格式
+        userConfig.put("sleepTimeEnd",sleepTimeEnd);//"08:00"
+
+        sendBody.put("imei",imei);
+        sendBody.put("cmd","BP96");//睡眠设置指令
+
+        bodyJson.put("userConfig",userConfig);
+        bodyJson.put("sendBody",sendBody);
+        RequestBody body = RequestBody.create(mediaType, bodyJson.toJSONString());
+
+        //   RequestBody body = RequestBody.create(mediaType, "{\r\n    \"userConfig\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"sleepSwitch\":1,\r\n        \"sleepTimeStart\":\"23:00\",\r\n        \"sleepTimeEnd\":\"08:00\"\r\n    },\r\n    \"sendBody\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"cmd\":\"BP96\"\r\n    }\r\n}");
+        Request request = new Request.Builder()
+                .url("https://api-xintai-beta.colofoo.com/openapi/device/updateConfig")
+                .post(body)
+                .addHeader("appId", appId)
+                .addHeader("appSecret", appSecret)
+                .addHeader("content-type", "application/json")
+                .build();
+        Response response = client.newCall(request).execute();
+        JSONObject jsonResult = (JSONObject) JSONObject.parse(response.body().string());
+        System.out.println(jsonResult);
+        return jsonResult;
+    }
+
+
+
+    /**
+     * 配置位置信息上传频率
+     * @param imei
+     * @param location
+     * @return JSONObject
+     * @throws Exception
+     */
+    public JSONObject configWatchLocation(String imei, Integer location) throws Exception{
+        OkHttpClient client = new OkHttpClient();
+        MediaType mediaType = MediaType.parse("application/json");
+        JSONObject bodyJson = new JSONObject();
+        JSONObject userConfig = new JSONObject();
+        JSONObject sendBody = new JSONObject();
+
+        userConfig.put("imei",imei);
+        userConfig.put("gpsswitch",0);//必须设置为0，关闭gps才会上报位置数据
+        userConfig.put("location",location);//单位： 秒
+
+        sendBody.put("imei",imei);
+        sendBody.put("cmd","BP34");//定位设置指令
+
+        bodyJson.put("userConfig",userConfig);
+        bodyJson.put("sendBody",sendBody);
+        RequestBody body = RequestBody.create(mediaType, bodyJson.toJSONString());
+
+        //   RequestBody body = RequestBody.create(mediaType, "{\r\n    \"userConfig\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"sleepSwitch\":1,\r\n        \"sleepTimeStart\":\"23:00\",\r\n        \"sleepTimeEnd\":\"08:00\"\r\n    },\r\n    \"sendBody\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"cmd\":\"BP96\"\r\n    }\r\n}");
+        Request request = new Request.Builder()
+                .url("https://api-xintai-beta.colofoo.com/openapi/device/updateConfig")
+                .post(body)
+                .addHeader("appId", appId)
+                .addHeader("appSecret", appSecret)
+                .addHeader("content-type", "application/json")
+                .build();
+        Response response = client.newCall(request).execute();
+        JSONObject jsonResult = (JSONObject) JSONObject.parse(response.body().string());
+        System.out.println(jsonResult);
+        return jsonResult;
+    }
+
+    /**
+     * 配置通讯录
+     * @param imei
+     * @param contacts
+     * @return JSONObject
+     * @throws Exception
+     */
+    public JSONObject configWatchContacts(String imei, JSONArray contacts) throws Exception{
+        OkHttpClient client = new OkHttpClient();
+        MediaType mediaType = MediaType.parse("application/json");
+        JSONObject bodyJson = new JSONObject();
+        JSONObject userConfig = new JSONObject();
+        JSONObject sendBody = new JSONObject();
+
+        userConfig.put("imei",imei);
+        userConfig.put("whiteList",contacts);//
+
+        sendBody.put("imei",imei);
+        sendBody.put("cmd","BP14");//通讯录设置指令
+
+        bodyJson.put("userConfig",userConfig);
+        bodyJson.put("sendBody",sendBody);
+        RequestBody body = RequestBody.create(mediaType, bodyJson.toJSONString());
+
+        //   RequestBody body = RequestBody.create(mediaType, "{\r\n    \"userConfig\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"sleepSwitch\":1,\r\n        \"sleepTimeStart\":\"23:00\",\r\n        \"sleepTimeEnd\":\"08:00\"\r\n    },\r\n    \"sendBody\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"cmd\":\"BP96\"\r\n    }\r\n}");
+        Request request = new Request.Builder()
+                .url("https://api-xintai-beta.colofoo.com/openapi/device/updateConfig")
+                .post(body)
+                .addHeader("appId", appId)
+                .addHeader("appSecret", appSecret)
+                .addHeader("content-type", "application/json")
+                .build();
+        Response response = client.newCall(request).execute();
+        JSONObject jsonResult = (JSONObject) JSONObject.parse(response.body().string());
+        System.out.println(jsonResult);
+        return jsonResult;
+    }
 
 
     /**
@@ -507,10 +704,13 @@ public class DWatchUricApiService {
 
 
     public static void main(String[] args)  throws Exception{
-
+    String xx = "xxx|1341312";
             //queryUserList();
-    }
+        System.out.println(xx.split("\\|")[1]);
 
+
+
+    }
 
 
 

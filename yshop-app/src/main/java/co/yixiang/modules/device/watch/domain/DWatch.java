@@ -7,15 +7,16 @@
 * 一经发现盗用、分享等行为，将追究法律责任，后果自负
 */
 package co.yixiang.modules.watch.domain;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
-import com.baomidou.mybatisplus.annotation.TableName;
+
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
-import javax.validation.constraints.*;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+
+import javax.validation.constraints.NotBlank;
 import java.util.Date;
-import co.yixiang.domain.BaseDomain;
 
 /**
 * @author jiansun
@@ -92,7 +93,6 @@ public class DWatch  {
      */
     private Double calibrateDbp;
 
-
     /**
      * 一组联系人，使用|分隔名称和电话号码，名称使用UNICODE编码直接下发byte，多组之间使用逗号分隔，未填写的可为空，但位置仍需保留";"白名单无更新，通过覆盖来设置
      *      示例：""whiteList"":[""D3590D54|189*****192"",""D3590D54|189*****192""]
@@ -120,7 +120,6 @@ public class DWatch  {
      * 最低心率
      */
     private Double hrLow;
-
 
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")

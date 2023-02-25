@@ -75,6 +75,16 @@ public class DWatchUricDataRecordsServiceImpl extends BaseServiceImpl<DWatchUric
 
 
     @Override
+    public List<Map> getMapLocationRecordsByImei(String day,String imei) {
+        return baseMapper.queryMapLocationRecordsByImei(day,imei);
+    }
+
+    @Override
+    public List<Map> getMapLocationRecordsByUid(String day, Long uid) {
+        return baseMapper.queryMapLocationRecordsByUid(day,uid);
+    }
+
+    @Override
     public void download(List<DWatchUricDataRecordsDto> all, HttpServletResponse response) throws IOException {
         List<Map<String, Object>> list = new ArrayList<>();
         for (DWatchUricDataRecordsDto dWatchUricDataRecords : all) {

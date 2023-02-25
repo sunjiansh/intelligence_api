@@ -10,7 +10,12 @@ package co.yixiang.modules.device.watchuricdatarecords.service.mapper;
 
 import co.yixiang.common.mapper.CoreMapper;
 import co.yixiang.modules.device.watchuricdatarecords.domain.DWatchUricDataRecords;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Map;
 
 /**
 * @author jiansun
@@ -18,5 +23,14 @@ import org.springframework.stereotype.Repository;
 */
 @Repository
 public interface DWatchUricDataRecordsMapper extends CoreMapper<DWatchUricDataRecords> {
+
+
+
+    @Select("select * from view_map_location_records where imei = #{imei} and push_day= #{day} ")
+    public List<Map> queryMapLocationRecordsByImei(@Param("day") String day,@Param("imei") String imei);
+
+
+    @Select("select * from view_map_location_records where user_id = #{uid} and push_day= #{day} ")
+    public List<Map> queryMapLocationRecordsByUid(@Param("day") String day,@Param("uid") Long uid);
 
 }
