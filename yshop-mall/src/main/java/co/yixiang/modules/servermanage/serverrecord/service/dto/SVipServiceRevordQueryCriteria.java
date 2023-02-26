@@ -18,4 +18,14 @@ import co.yixiang.annotation.Query;
 */
 @Data
 public class SVipServiceRevordQueryCriteria{
+
+
+    /** 客服人员 */
+    @Query
+    private String serverPerson;
+
+    /** 被服务人员名称 */
+    @Query
+    private String memberName;
+
 }

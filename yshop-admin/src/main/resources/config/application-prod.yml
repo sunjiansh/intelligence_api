@@ -7,9 +7,9 @@ spring:
       type: com.alibaba.druid.pool.DruidDataSource
       driverClassName: com.mysql.cj.jdbc.Driver
       #url: jdbc:mysql://localhost:3306/yshopb2c?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useSSL=false&zeroDateTimeBehavior=convertToNull
-      url: jdbc:mysql://localhost:3306/intelligence?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useSSL=false&zeroDateTimeBehavior=convertToNull
-      username: yshopb2c
-      password: bkfGfAimifjPZtNE
+      url: jdbc:mysql://localhost:33110/intelligence?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useSSL=false&zeroDateTimeBehavior=convertToNull
+      username: admin
+      password: Root!!2023
 
       # 初始连接数
       initialSize: 5
@@ -99,8 +99,8 @@ swagger:
 
 
 file:
-  path: /home/yshop/file/
-  avatar: /home/yshop/avatar/
+  path: C:/intelligence/localfile/file/
+  avatar: C:/intelligence/localfile/avatar/
   # 文件大小 /M
   maxSize: 100
   avatarMaxSize: 5

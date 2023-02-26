@@ -4,6 +4,8 @@ import co.yixiang.common.enums.WatchUricCmdEnum;
 import co.yixiang.common.util.GeographyCalc;
 import co.yixiang.modules.device.apiservice.DWatchUricApiService;
 import co.yixiang.modules.device.mqtt.ServerMQTT;
+import co.yixiang.modules.device.uric.domain.DUric;
+import co.yixiang.modules.device.uric.service.DUricService;
 import co.yixiang.modules.device.watchuricdatarecords.domain.DWatchUricDataRecords;
 import co.yixiang.modules.device.watchuricdatarecords.service.mapper.DWatchUricDataRecordsMapper;
 import co.yixiang.modules.monotormanage.alarmrecord.domain.SAlarmReccord;
@@ -13,8 +15,8 @@ import co.yixiang.modules.monotormanage.geography.service.SGeographyService;
 import co.yixiang.modules.user.domain.YxUser;
 import co.yixiang.modules.user.service.YxUserService;
 import co.yixiang.modules.user.service.mapper.UserMapper;
+import co.yixiang.modules.watch.domain.DWatch;
 import co.yixiang.utils.SpringContextHolder;
-import co.yixiang.utils.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +40,12 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 	private  DWatchUricApiService dWatchUricApiService = (DWatchUricApiService)SpringContextHolder.getBean(DWatchUricApiService.class);
 	private SAlarmReccordService sAlarmReccordService = (SAlarmReccordService)SpringContextHolder.getBean(SAlarmReccordService.class);
 	private SGeographyService sGeographyService = (SGeographyService)SpringContextHolder.getBean(SGeographyService.class);
+	private final co.yixiang.modules.watch.service.DWatchService dWatchService = SpringContextHolder.getBean(co.yixiang.modules.watch.service.DWatchService.class);
+	private final DUricService dUricService = SpringContextHolder.getBean(DUricService.class);
+
+
+
+
 
 	private JSONObject json;
 
@@ -66,10 +74,27 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 		//YxUser user= yxUserMapper.queryUserByImei(imei);
 
 		YxUser user = yxUserService.getOne(new LambdaQueryWrapper<YxUser>().eq(YxUser::getImei,imei).or().eq(YxUser::getUricSn,imei));
-		//该设备没有绑定用户，或者账号处于锁定状态，无需记录上传的数据
-		if(user ==null || user.getStatus()==0){
+
+		//该设备没有绑定用户，无需记录上传的数据
+		if(user ==null){
+			log.error("该设备没有绑定用户，不予上报数据！IMIE:"+imei);
 			return;
 		}
+
+		//该用户账号处于锁定状态，无需记录上传的数据
+		if(user.getStatus()==0){
+			//该设备没有绑定用户，无需记录上传的数据
+			log.error("该用户账号处于锁定状态，不予上报数据！phone:"+user.getPhone());
+			return;
+		}
+
+		//TODO check 用户是否在会员有效期内
+		Date now = new Date();
+		if(!(now.before(user.getServiceEnd()) && now.after(user.getServiceStart()))){
+			log.error("该用户在不在会员有效期，不予上报数据！phone:"+user.getPhone());
+			return;
+		}
+
 
 		//主机的IMEI
 		String  mainUnitImei = "";
@@ -87,17 +112,39 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 		//尿酸分析仪
 		if(WatchUricCmdEnum.CZW31.getValue().equals(cmd) || WatchUricCmdEnum.CZW32.equals(cmd) || WatchUricCmdEnum.CZW33.getValue().equals(cmd)){
 			mainUnitImei = yxUserMapper.findMainUnitImeiByUrinSn(imei);
-			//TODO 4、绑定尿酸分析仪，要放在主设备维护那里做绑定
-			try {
-				JSONObject bind2Result  = dWatchUricApiService.bindUricDevice(user.getUid(),imei);
-				if(bind2Result.getInteger("code") != 200){
-					log.error(bind2Result.getString("msg"));
-				}
-			}catch (Exception e){
-				log.error("调用智能手环平台绑定尿酸分析仪接口失败！"+e.getMessage());
+
+			DUric dUric = dUricService.getOne(new LambdaQueryWrapper<DUric>().eq(DUric::getImei,imei));
+			if(dUric == null){
+				log.error("该尿酸分析仪没有注册到本平台，不予上报数据！IMIE:"+imei);
+				return;
 			}
+			if(dUric.getIsActive() == 0){
+				log.error("该尿酸分析仪处于非激活状态，不予上报数据！IMIE:"+imei);
+				return;
+			}
+
+			//TODO 4、绑定尿酸分析仪，要放在主设备维护那里做绑定
+//			try {
+//				JSONObject bind2Result  = dWatchUricApiService.bindUricDevice(user.getUid(),imei);
+//				if(bind2Result.getInteger("code") != 200){
+//					log.error(bind2Result.getString("msg"));
+//				}
+//			}catch (Exception e){
+//				log.error("调用智能手环平台绑定尿酸分析仪接口失败！"+e.getMessage());
+//			}
 		}else{//智能手环
 			mainUnitImei = yxUserMapper.fineMainUnitImeiByWatchImei(imei);
+
+			co.yixiang.modules.watch.domain.DWatch watch = dWatchService.getOne(new LambdaQueryWrapper<co.yixiang.modules.watch.domain.DWatch>().eq(co.yixiang.modules.watch.domain.DWatch::getImei,imei));
+			if(watch == null){
+				log.error("该手环没有注册到本平台，不予上报数据！IMIE:"+imei);
+				return;
+			}
+			if(watch.getIsActive() == 0){
+				log.error("该手环处于非激活状态，不予上报数据！IMIE:"+imei);
+				return;
+			}
+
 		}
 
 		switch (wcmd){
@@ -106,9 +153,12 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 				break;
 			case CZW02://手动测量爱体检
 				saveBpInfo(entity,json,mainUnitImei);
+				handleBoldAlarmInfo(entity);
+				handleHrAlarmInfo(entity);
 				break;
 			case CZW03://手动上传心率
 				saveHrInfo(entity,json,mainUnitImei);
+				handleHrAlarmInfo(entity);
 				break;
 			case CZW04://自动上传睡眠信息
 				saveSleepInfo(entity,json,mainUnitImei);
@@ -118,10 +168,11 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 				break;
 			case CZW06://手动测量体温
 				saveTemperatureInfo(entity,json,mainUnitImei);
+				handleTemperatureAlarmInfo(entity);
 				break;
 			case CZW07://自动上传位置信息
 				saveLocationInfo(entity,json,mainUnitImei);
-				handleAlarmInfo(entity);
+				handleGeographyAlarmInfo(entity);
 				break;
 			case CZW30://自动上传围栏通知
 				saveWLInfo(entity,json,mainUnitImei);
@@ -355,8 +406,11 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 		dWatchUricDataRecordsMapper.insert(entity);
 	}
 
-
-	private void handleAlarmInfo(DWatchUricDataRecords entity){
+	/**
+	 * 处理电子围栏报警信息
+	 * @param entity
+	 */
+	private void handleGeographyAlarmInfo(DWatchUricDataRecords entity){
 			String location =	entity.getLocation();
 			String[] latLng = location.split(",");
 			Double lon = Double.parseDouble(latLng[0]);
@@ -378,13 +432,77 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 					alarmReccord.setMemberId(user.getUid());
 					alarmReccord.setMenberName(user.getRealName());
 					alarmReccord.setPhone(user.getPhone());
-					alarmReccord.setAlarmType(1);//报警类型1 围栏报警 2 风险分级
+					alarmReccord.setAlarmType(SAlarmReccord.ALARM_TYPE_GEO);//报警类型1 围栏报警 2 风险分级
 					alarmReccord.setImei(entity.getImei());
 					alarmReccord.setContent(content.toString());
 					alarmReccord.setCreateTime(new Date());
 					sAlarmReccordService.save(alarmReccord);
 				}
 			}
+	}
+
+	/**
+	 * 处理体温报警信息
+	 * @param entity
+	 */
+	private void handleTemperatureAlarmInfo(DWatchUricDataRecords entity){
+		co.yixiang.modules.watch.domain.DWatch watch = dWatchService.getOne(new LambdaQueryWrapper<DWatch>().eq(DWatch::getImei,entity.getImei()));
+		if(Double.parseDouble(entity.getTemperature()) > watch.getTemperatureHeight()/10 || Double.parseDouble(entity.getTemperature()) < watch.getTemperatureLow()/10){
+			YxUser user = yxUserMapper.selectById(entity.getUserId());
+			SAlarmReccord alarmReccord = new SAlarmReccord();
+			String content = String.format("体温异常，最高预警值%s，最低预警值%s，当前测量值%s",watch.getTemperatureHeight()/10,watch.getTemperatureLow()/10,entity.getTemperature() );
+			alarmReccord.setMemberId(user.getUid());
+			alarmReccord.setMenberName(user.getRealName());
+			alarmReccord.setPhone(user.getPhone());
+			alarmReccord.setAlarmType(SAlarmReccord.ALARM_TYPE_TEMP);
+			alarmReccord.setImei(entity.getImei());
+			alarmReccord.setContent(content);
+			alarmReccord.setCreateTime(new Date());
+			sAlarmReccordService.save(alarmReccord);
+		}
+	}
+
+	/**
+	 * 处理心率报警信息
+	 * @param entity
+	 */
+	private void handleHrAlarmInfo(DWatchUricDataRecords entity){
+		co.yixiang.modules.watch.domain.DWatch watch = dWatchService.getOne(new LambdaQueryWrapper<DWatch>().eq(DWatch::getImei,entity.getImei()));
+		if(entity.getHeartRate() > watch.getHrHeight() || entity.getHeartRate() < watch.getHrLow()){
+			YxUser user = yxUserMapper.selectById(entity.getUserId());
+			SAlarmReccord alarmReccord = new SAlarmReccord();
+			String content = String.format("心率异常，最高预警值%s，最低预警值%s，当前测量值%s",watch.getHrHeight(),watch.getHrLow(),entity.getHeartRate() );
+			alarmReccord.setMemberId(user.getUid());
+			alarmReccord.setMenberName(user.getRealName());
+			alarmReccord.setPhone(user.getPhone());
+			alarmReccord.setAlarmType(SAlarmReccord.ALARM_TYPE_HR);
+			alarmReccord.setImei(entity.getImei());
+			alarmReccord.setContent(content);
+			alarmReccord.setCreateTime(new Date());
+			sAlarmReccordService.save(alarmReccord);
+		}
+	}
+
+
+	/**
+	 * 处理血压报警信息
+	 * @param entity
+	 */
+	private void handleBoldAlarmInfo(DWatchUricDataRecords entity){
+		co.yixiang.modules.watch.domain.DWatch watch = dWatchService.getOne(new LambdaQueryWrapper<DWatch>().eq(DWatch::getImei,entity.getImei()));
+		if(entity.getSbp() > watch.getCalibrateSbp() || entity.getDbp() < watch.getCalibrateDbp()){
+			YxUser user = yxUserMapper.selectById(entity.getUserId());
+			SAlarmReccord alarmReccord = new SAlarmReccord();
+			String content = String.format("血压异常，舒张压预警值%s，收缩压预警值%s，当前测量值%s",watch.getCalibrateDbp(),watch.getCalibrateSbp(),entity.getDbp()+"-"+entity.getSbp() );
+			alarmReccord.setMemberId(user.getUid());
+			alarmReccord.setMenberName(user.getRealName());
+			alarmReccord.setPhone(user.getPhone());
+			alarmReccord.setAlarmType(SAlarmReccord.ALARM_TYPE_BOLD);
+			alarmReccord.setImei(entity.getImei());
+			alarmReccord.setContent(content);
+			alarmReccord.setCreateTime(new Date());
+			sAlarmReccordService.save(alarmReccord);
+		}
 	}
 
 

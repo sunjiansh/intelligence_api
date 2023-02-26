@@ -18,4 +18,10 @@ import co.yixiang.annotation.Query;
 */
 @Data
 public class SVipSosRecordQueryCriteria{
+
+
+    /** 会员手机号 */
+    @Query
+    private String memberPhone;
+
 }

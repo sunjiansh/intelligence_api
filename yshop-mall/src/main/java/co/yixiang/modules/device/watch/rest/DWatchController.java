@@ -49,7 +49,7 @@ public class DWatchController {
     @Log("导出数据")
     @ApiOperation("导出数据")
     @GetMapping(value = "/download")
-    @PreAuthorize("@el.check('admin','dWatch:list')")
+    //@PreAuthorize("@el.check('admin','dWatch:list')")
     public void download(HttpServletResponse response, DWatchQueryCriteria criteria) throws IOException {
         dWatchService.download(generator.convert(dWatchService.queryAll(criteria), DWatchDto.class), response);
     }
@@ -69,7 +69,7 @@ public class DWatchController {
     @GetMapping
     @Log("查询智能手环")
     @ApiOperation("查询智能手环")
-    @PreAuthorize("@el.check('admin','dWatch:list')")
+    //@PreAuthorize("@el.check('admin','dWatch:list')")
     public ResponseEntity<PageResult<DWatchDto>> getDWatchs(DWatchQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(dWatchService.queryAll(criteria,pageable),HttpStatus.OK);
     }
@@ -77,7 +77,7 @@ public class DWatchController {
     @PostMapping
     @Log("新增智能手环")
     @ApiOperation("新增智能手环")
-    @PreAuthorize("@el.check('admin','dWatch:add')")
+    //@PreAuthorize("@el.check('admin','dWatch:add')")
     public ResponseEntity<Object> create(@Validated @RequestBody DWatch resources){
         resources.setCreateTime(new Date());
         return new ResponseEntity<>(dWatchService.save(resources),HttpStatus.CREATED);
@@ -86,7 +86,7 @@ public class DWatchController {
     @PutMapping
     @Log("修改智能手环")
     @ApiOperation("修改智能手环")
-    @PreAuthorize("@el.check('admin','dWatch:edit')")
+    //@PreAuthorize("@el.check('admin','dWatch:edit')")
     public ResponseEntity<Object> update(@Validated @RequestBody DWatch resources){
 
         DWatch existWatch = dWatchService.getById(resources.getId());
@@ -100,7 +100,7 @@ public class DWatchController {
 
     @Log("删除智能手环")
     @ApiOperation("删除智能手环")
-    @PreAuthorize("@el.check('admin','dWatch:del')")
+    //@PreAuthorize("@el.check('admin','dWatch:del')")
     @DeleteMapping
     public ResponseEntity<Object> deleteAll(@RequestBody Long[] ids) {
         Arrays.asList(ids).forEach(id->{
@@ -112,7 +112,7 @@ public class DWatchController {
 
     @Log("初始化配置手表信息")
     @ApiOperation(value = "初始化配置手表信息")
-    @PutMapping(value = "/configWatch")
+   // @PutMapping(value = "/configWatch")
     public ResponseEntity configWatch(@RequestBody DWatch resources){
         try {
             //  TODO 1、api 同步配置信息

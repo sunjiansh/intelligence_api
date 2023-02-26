@@ -26,6 +26,19 @@ import co.yixiang.domain.BaseDomain;
 @Data
 @TableName("s_alarm_reccord")
 public class SAlarmReccord {
+
+    //围栏报警
+    public static final  int ALARM_TYPE_GEO = 1;
+    //风险分级更新
+    public static final  int ALARM_TYPE_RISK = 2;
+    //血压异常报警
+    public static final  int ALARM_TYPE_BOLD = 3;
+    //心率异常报警
+    public static final  int ALARM_TYPE_HR = 4;
+    //体温异常报警
+    public static final  int ALARM_TYPE_TEMP = 5;
+
+
     @TableId
     private Long id;
 

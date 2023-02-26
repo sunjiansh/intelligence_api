@@ -43,7 +43,7 @@ public class DUricController {
     @Log("导出数据")
     @ApiOperation("导出数据")
     @GetMapping(value = "/download")
-    @PreAuthorize("@el.check('admin','dUric:list')")
+    //@PreAuthorize("@el.check('admin','dUric:list')")
     public void download(HttpServletResponse response, DUricQueryCriteria criteria) throws IOException {
         dUricService.download(generator.convert(dUricService.queryAll(criteria), DUricDto.class), response);
     }
@@ -51,7 +51,7 @@ public class DUricController {
     @GetMapping
     @Log("查询尿酸分析仪")
     @ApiOperation("查询尿酸分析仪")
-    @PreAuthorize("@el.check('admin','dUric:list')")
+    //@PreAuthorize("@el.check('admin','dUric:list')")
     public ResponseEntity<PageResult<DUricDto>> getDUrics(DUricQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(dUricService.queryAll(criteria,pageable),HttpStatus.OK);
     }
@@ -69,7 +69,7 @@ public class DUricController {
     @PostMapping
     @Log("新增尿酸分析仪")
     @ApiOperation("新增尿酸分析仪")
-    @PreAuthorize("@el.check('admin','dUric:add')")
+   // @PreAuthorize("@el.check('admin','dUric:add')")
     public ResponseEntity<Object> create(@Validated @RequestBody DUric resources){
         resources.setCreateTime(new Date());
         return new ResponseEntity<>(dUricService.save(resources),HttpStatus.CREATED);
@@ -78,7 +78,7 @@ public class DUricController {
     @PutMapping
     @Log("修改尿酸分析仪")
     @ApiOperation("修改尿酸分析仪")
-    @PreAuthorize("@el.check('admin','dUric:edit')")
+    //@PreAuthorize("@el.check('admin','dUric:edit')")
     public ResponseEntity<Object> update(@Validated @RequestBody DUric resources){
         dUricService.updateById(resources);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -86,7 +86,7 @@ public class DUricController {
 
     @Log("删除尿酸分析仪")
     @ApiOperation("删除尿酸分析仪")
-    @PreAuthorize("@el.check('admin','dUric:del')")
+   // @PreAuthorize("@el.check('admin','dUric:del')")
     @DeleteMapping
     public ResponseEntity<Object> deleteAll(@RequestBody Long[] ids) {
         Arrays.asList(ids).forEach(id->{

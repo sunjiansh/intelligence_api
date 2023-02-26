@@ -42,7 +42,7 @@ public class DMailunitController {
     @Log("导出数据")
     @ApiOperation("导出数据")
     @GetMapping(value = "/download")
-    @PreAuthorize("@el.check('admin','dMailunit:list')")
+    //@PreAuthorize("@el.check('admin','dMailunit:list')")
     public void download(HttpServletResponse response, DMailunitQueryCriteria criteria) throws IOException {
         dMailunitService.download(generator.convert(dMailunitService.queryAll(criteria), DMailunitDto.class), response);
     }
@@ -50,7 +50,7 @@ public class DMailunitController {
     @GetMapping
     @Log("查询主机设备")
     @ApiOperation("查询主机设备")
-    @PreAuthorize("@el.check('admin','dMailunit:list')")
+    //@PreAuthorize("@el.check('admin','dMailunit:list')")
     public ResponseEntity<PageResult<DMailunitDto>> getDMailunits(DMailunitQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(dMailunitService.queryAll(criteria,pageable),HttpStatus.OK);
     }
@@ -58,7 +58,7 @@ public class DMailunitController {
     @PostMapping
     @Log("新增主机设备")
     @ApiOperation("新增主机设备")
-    @PreAuthorize("@el.check('admin','dMailunit:add')")
+    //@PreAuthorize("@el.check('admin','dMailunit:add')")
     public ResponseEntity<Object> create(@Validated @RequestBody DMailunit resources){
         return new ResponseEntity<>(dMailunitService.save(resources),HttpStatus.CREATED);
     }
@@ -66,7 +66,7 @@ public class DMailunitController {
     @PutMapping
     @Log("修改主机设备")
     @ApiOperation("修改主机设备")
-    @PreAuthorize("@el.check('admin','dMailunit:edit')")
+    //@PreAuthorize("@el.check('admin','dMailunit:edit')")
     public ResponseEntity<Object> update(@Validated @RequestBody DMailunit resources){
         dMailunitService.updateById(resources);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -74,7 +74,7 @@ public class DMailunitController {
 
     @Log("删除主机设备")
     @ApiOperation("删除主机设备")
-    @PreAuthorize("@el.check('admin','dMailunit:del')")
+    //@PreAuthorize("@el.check('admin','dMailunit:del')")
     @DeleteMapping
     public ResponseEntity<Object> deleteAll(@RequestBody Long[] ids) {
         Arrays.asList(ids).forEach(id->{

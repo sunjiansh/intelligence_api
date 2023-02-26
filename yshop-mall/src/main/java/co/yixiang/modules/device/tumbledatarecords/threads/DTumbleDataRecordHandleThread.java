@@ -3,6 +3,7 @@ package co.yixiang.modules.device.tumbledatarecords.threads;
 import co.yixiang.common.enums.TumbleCmdEnum;
 import co.yixiang.common.util.APPdataUtil;
 import co.yixiang.common.util.BASE64;
+import co.yixiang.common.util.RedisContans;
 import co.yixiang.modules.device.mqtt.ServerMQTT;
 import co.yixiang.modules.device.tumble.service.mapper.DTumbleMapper;
 import co.yixiang.modules.device.tumbledatarecords.domain.DTumbleDataRecords;
@@ -11,9 +12,12 @@ import co.yixiang.modules.servermanage.sosrecord.domain.SVipSosRecord;
 import co.yixiang.modules.servermanage.sosrecord.service.SVipSosRecordService;
 import co.yixiang.modules.user.domain.YxUser;
 import co.yixiang.modules.user.service.mapper.UserMapper;
+import co.yixiang.modules.watch.domain.DWatch;
 import co.yixiang.utils.DateUtils;
+import co.yixiang.utils.RedisUtils;
 import co.yixiang.utils.SpringContextHolder;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +36,10 @@ public class DTumbleDataRecordHandleThread implements Runnable{
     private UserMapper yxUserMapper = (UserMapper) SpringContextHolder.getBean(UserMapper.class);
     private DTumbleMapper dTumbleMapper =  (DTumbleMapper) SpringContextHolder.getBean(DTumbleMapper.class);
     private SVipSosRecordService sVipSosRecordService = (SVipSosRecordService) SpringContextHolder.getBean(SVipSosRecordService.class);
+    private final co.yixiang.modules.watch.service.DWatchService dWatchService = SpringContextHolder.getBean(co.yixiang.modules.watch.service.DWatchService.class);
+    private RedisUtils redisUtil = (RedisUtils) SpringContextHolder.getBean(RedisUtils.class);
+
+
 
     private JSONObject json;
 
@@ -91,11 +99,29 @@ public class DTumbleDataRecordHandleThread implements Runnable{
         }
         String  mainUnitImei = yxUserMapper.findMainUnitImeiByTumbleImei(imei);
         //TODO 2、用users和redis中主机当前登陆人匹配，匹配上谁。本次上传的数据就算是谁的
+        //正式上线后解开下面的代码
+//        Long userId = RedisContans.getTerminalCurrentUserId(mainUnitImei);
+//        if(userId == null){
+//            log.error("该跌倒报警的用户没有在主机端登录过，不予上报数据！主机imei:"+mainUnitImei);
+//            return;
+//        }
+
         Long userId = 1L;
 
+        //TODO 3、根据uid验证终端设备是否有权限上传数据
+        YxUser user = yxUserMapper.selectById(userId);
+        //该用户账号处于锁定状态，无需记录上传的数据
+        if(user.getStatus()==0){
+            log.error("该用户账号处于锁定状态，不予上报数据！phone:"+user.getPhone());
+            return;
+        }
 
-
-        //TODO 3、根据IMEI验证终端设备是否有权限上传数据
+        //TODO check 用户是否在会员有效期内
+        Date now = new Date();
+        if(!(now.before(user.getServiceEnd()) && now.after(user.getServiceStart()))){
+            log.error("该用户在不在会员有效期，不予上报数据！phone:"+user.getPhone());
+            return;
+        }
 
 
         String cmd = APPdataUtil.getCmd(APPdata);
@@ -169,6 +195,7 @@ public class DTumbleDataRecordHandleThread implements Runnable{
 
             //TODO 保存一条报警信息,这个逻辑应该放在SOS报警的地方
             YxUser user  = yxUserMapper.selectById(records.getUserId());
+            co.yixiang.modules.watch.domain.DWatch watch = dWatchService.getOne(new LambdaQueryWrapper<DWatch>().eq(DWatch::getImei,user.getImei()));
             SVipSosRecord sVipSosRecord = new SVipSosRecord();
             Date now = new Date();
             sVipSosRecord.setMemberId(user.getUid());
@@ -176,7 +203,7 @@ public class DTumbleDataRecordHandleThread implements Runnable{
             sVipSosRecord.setMemberPhone(user.getPhone());
             sVipSosRecord.setSosTime(now);
             sVipSosRecord.setServiceEndTime(user.getServiceEnd());
-            sVipSosRecord.setSosContact(user.getSosContact());
+            sVipSosRecord.setSosContact(watch==null?"没有绑定手环，无SOS联系人":watch.getSos());
             if(user.getServiceEnd() != null){
                 if(now.before(user.getServiceEnd())){
                     int days = DateUtils.differentDaysByMillisecond(now,user.getServiceEnd());
@@ -210,6 +237,34 @@ public class DTumbleDataRecordHandleThread implements Runnable{
               e.printStackTrace();
           }
       }
+
+        //TODO 保存一条报警信息,这个逻辑应该放在SOS报警的地方
+        YxUser user  = yxUserMapper.selectById(records.getUserId());
+        co.yixiang.modules.watch.domain.DWatch watch = dWatchService.getOne(new LambdaQueryWrapper<DWatch>().eq(DWatch::getImei,user.getImei()));
+        SVipSosRecord sVipSosRecord = new SVipSosRecord();
+        Date now = new Date();
+        sVipSosRecord.setMemberId(user.getUid());
+        sVipSosRecord.setMemberName(user.getRealName());
+        sVipSosRecord.setMemberPhone(user.getPhone());
+        sVipSosRecord.setSosTime(now);
+        sVipSosRecord.setServiceEndTime(user.getServiceEnd());
+        sVipSosRecord.setSosContact(watch==null?"没有绑定手环，无SOS联系人":watch.getSos());
+        if(user.getServiceEnd() != null){
+            if(now.before(user.getServiceEnd())){
+                int days = DateUtils.differentDaysByMillisecond(now,user.getServiceEnd());
+                sVipSosRecord.setLastDays(days > 0?days:0);
+            }else{
+                sVipSosRecord.setLastDays(0);
+            }
+        }
+        try {
+            sVipSosRecordService.save(sVipSosRecord);
+        }catch (Exception e){
+            log.error("保存SOS报警记录失败！"+e.getMessage());
+        }
+
+
+
 
         dTumbleDataRecordsMapper.insert(records);
     }

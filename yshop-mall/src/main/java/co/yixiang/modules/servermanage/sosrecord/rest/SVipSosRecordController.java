@@ -42,7 +42,7 @@ public class SVipSosRecordController {
     @Log("导出数据")
     @ApiOperation("导出数据")
     @GetMapping(value = "/download")
-    @PreAuthorize("@el.check('admin','sVipSosRecord:list')")
+    //@PreAuthorize("@el.check('admin','sVipSosRecord:list')")
     public void download(HttpServletResponse response, SVipSosRecordQueryCriteria criteria) throws IOException {
         sVipSosRecordService.download(generator.convert(sVipSosRecordService.queryAll(criteria), SVipSosRecordDto.class), response);
     }
@@ -50,7 +50,7 @@ public class SVipSosRecordController {
     @GetMapping
     @Log("查询会员服务管理-SOS记录")
     @ApiOperation("查询会员服务管理-SOS记录")
-    @PreAuthorize("@el.check('admin','sVipSosRecord:list')")
+   // @PreAuthorize("@el.check('admin','sVipSosRecord:list')")
     public ResponseEntity<PageResult<SVipSosRecordDto>> getSVipSosRecords(SVipSosRecordQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(sVipSosRecordService.queryAll(criteria,pageable),HttpStatus.OK);
     }
@@ -66,7 +66,7 @@ public class SVipSosRecordController {
     @PutMapping
     @Log("修改会员服务管理-SOS记录")
     @ApiOperation("修改会员服务管理-SOS记录")
-    @PreAuthorize("@el.check('admin','sVipSosRecord:edit')")
+   // @PreAuthorize("@el.check('admin','sVipSosRecord:edit')")
     public ResponseEntity<Object> update(@Validated @RequestBody SVipSosRecord resources){
         sVipSosRecordService.updateById(resources);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -74,7 +74,7 @@ public class SVipSosRecordController {
 
     @Log("删除会员服务管理-SOS记录")
     @ApiOperation("删除会员服务管理-SOS记录")
-    @PreAuthorize("@el.check('admin','sVipSosRecord:del')")
+   // @PreAuthorize("@el.check('admin','sVipSosRecord:del')")
     @DeleteMapping
     public ResponseEntity<Object> deleteAll(@RequestBody Long[] ids) {
         Arrays.asList(ids).forEach(id->{

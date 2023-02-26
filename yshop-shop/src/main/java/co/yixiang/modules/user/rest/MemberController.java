@@ -149,10 +149,11 @@ public class MemberController {
                 .build();
 
         yxUserService.save(user);
+        //同步用户信息到手环平台
         try {
             yxUserService.syncNewUserInfo2WatchUric(user);
         }catch (Exception e){
-            throw new BadRequestException("同步失败！"+e.getMessage());
+            throw new BadRequestException("同步用户信息到手环平台失败！"+e.getMessage());
         }
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
@@ -227,7 +228,7 @@ public class MemberController {
     }
 
 
-    @ApiOperation(value = "同步用户手环信息到手环平台")
+    @ApiOperation(value = "同步用户绑定手环信息到手环平台")
     @PostMapping(value = "/yxUser/syncWatchBindInfo")
     public ResponseEntity syncWatchBindInfo(@RequestBody YxUser resources){
         if (ObjectUtil.isEmpty(resources.getUid())) {
@@ -240,14 +241,16 @@ public class MemberController {
         try {
             yxUserService.syncWatchBindInfo(resources.getUid(),resources.getImei());
         }catch (Exception e){
-            throw new BadRequestException("同步失败！"+e.getMessage());
+            throw new BadRequestException("同步用户绑定手环信息到手环平台失败！"+e.getMessage());
         }
 
-        try {
-            yxUserService.syncWatchSOSConfig(resources.getImei(),resources.getSosContact());
-        }catch (Exception e){
-            throw new BadRequestException("同步失败！"+e.getMessage());
-        }
+
+        //sos 绑定动作放在移动端，给用户自己设定
+//        try {
+//            yxUserService.syncWatchSOSConfig(resources.getImei(),resources.getSosContact());
+//        }catch (Exception e){
+//            throw new BadRequestException("同步用户SOS信息到手环平台失败！"+e.getMessage());
+//        }
 
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }

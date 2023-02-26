@@ -15,6 +15,8 @@ import co.yixiang.domain.PageResult;
 import co.yixiang.dozer.service.IGenerator;
 import co.yixiang.modules.device.apiservice.DWatchUricApiService;
 import co.yixiang.modules.device.mqtt.ServerMQTT;
+import co.yixiang.modules.device.uric.domain.DUric;
+import co.yixiang.modules.device.uric.service.DUricService;
 import co.yixiang.modules.device.watchuricdatarecords.domain.DWatchUricDataRecords;
 import co.yixiang.modules.device.watchuricdatarecords.service.DWatchUricDataRecordsService;
 import co.yixiang.modules.device.watchuricdatarecords.service.dto.DWatchUricDataRecordsDto;
@@ -22,8 +24,10 @@ import co.yixiang.modules.device.watchuricdatarecords.service.dto.DWatchUricData
 import co.yixiang.modules.device.watchuricdatarecords.service.mapper.DWatchUricDataRecordsMapper;
 import co.yixiang.modules.user.domain.YxUser;
 import co.yixiang.modules.user.service.mapper.UserMapper;
+import co.yixiang.modules.watch.domain.DWatch;
 import co.yixiang.utils.FileUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageInfo;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +60,8 @@ public class DWatchUricDataRecordsServiceImpl extends BaseServiceImpl<DWatchUric
     private final DWatchUricDataRecordsMapper dWatchUricDataRecordsMapper;
     private final  UserMapper yxUserMapper;
     private final DWatchUricApiService dWatchUricApiService;
+    private final co.yixiang.modules.watch.service.DWatchService dWatchService;
+    private final DUricService dUricService;
 
 
     @Override
@@ -168,17 +174,30 @@ public class DWatchUricDataRecordsServiceImpl extends BaseServiceImpl<DWatchUric
         //尿酸分析仪
         if(WatchUricCmdEnum.CZW31.getValue().equals(cmd) || WatchUricCmdEnum.CZW32.equals(cmd) || WatchUricCmdEnum.CZW33.getValue().equals(cmd)){
             mainUnitImei = yxUserMapper.findMainUnitImeiByUrinSn(imei);
-            //TODO 4、绑定尿酸分析仪，要放在主设备维护那里做绑定
-            try {
-                JSONObject bind2Result  = dWatchUricApiService.bindUricDevice(user.getUid(),imei);
-                if(bind2Result.getInteger("code") != 200){
-                    log.error(bind2Result.getString("msg"));
-                }
-            }catch (Exception e){
-                log.error("调用智能手环平台绑定尿酸分析仪接口失败！"+e.getMessage());
+
+            DUric dUric = dUricService.getOne(new LambdaQueryWrapper<DUric>().eq(DUric::getImei,imei));
+            if(dUric == null){
+                log.error("该尿酸分析仪没有注册到本平台，不予上报数据！IMIE:"+imei);
+                return;
             }
+            if(dUric.getIsActive() == 0){
+                log.error("该尿酸分析仪处于非激活状态，不予上报数据！IMIE:"+imei);
+                return;
+            }
+
+            //TODO 4、绑定尿酸分析仪，要放在主设备维护那里做绑定
+//            try {
+//                JSONObject bind2Result  = dWatchUricApiService.bindUricDevice(user.getUid(),imei);
+//                if(bind2Result.getInteger("code") != 200){
+//                    log.error(bind2Result.getString("msg"));
+//                }
+//            }catch (Exception e){
+//                log.error("调用智能手环平台绑定尿酸分析仪接口失败！"+e.getMessage());
+//            }
         }else{//智能手环
             mainUnitImei = yxUserMapper.fineMainUnitImeiByWatchImei(imei);
+            co.yixiang.modules.watch.domain.DWatch watch = dWatchService.getOne(new LambdaQueryWrapper<DWatch>().eq(DWatch::getImei,imei));
+
             //TODO 3、绑定手环信息(已经再用户管理那绑定好)
 //            try {
 //                JSONObject bindResult  = dWatchUricApiService.bindWatch(user.getUid(),imei);
