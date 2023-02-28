@@ -27,6 +27,14 @@ import co.yixiang.domain.BaseDomain;
 @Data
 @TableName("s_article")
 public class SArticle  {
+
+    // 养生帮助
+    public static final String ARTICLE_TYPE_HEALTH = "0";
+
+    //帮助中心
+    public static final String ARTICLE_TYPE_HELP = "1";
+
+
     @TableId
     private Long id;
 
