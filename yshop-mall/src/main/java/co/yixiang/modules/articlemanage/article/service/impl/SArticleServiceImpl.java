@@ -8,35 +8,34 @@
 */
 package co.yixiang.modules.articlemanage.article.service.impl;
 
-import co.yixiang.modules.articlemanage.article.domain.SArticle;
 import co.yixiang.common.service.impl.BaseServiceImpl;
-import lombok.AllArgsConstructor;
-import co.yixiang.dozer.service.IGenerator;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import co.yixiang.common.utils.QueryHelpPlus;
-import co.yixiang.utils.ValidationUtil;
-import co.yixiang.utils.FileUtil;
+import co.yixiang.domain.PageResult;
+import co.yixiang.dozer.service.IGenerator;
+import co.yixiang.modules.articlemanage.article.domain.SArticle;
 import co.yixiang.modules.articlemanage.article.service.SArticleService;
 import co.yixiang.modules.articlemanage.article.service.dto.SArticleDto;
 import co.yixiang.modules.articlemanage.article.service.dto.SArticleQueryCriteria;
 import co.yixiang.modules.articlemanage.article.service.mapper.SArticleMapper;
+import co.yixiang.utils.FileUtil;
+import com.github.pagehelper.PageInfo;
+import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 // 默认不使用缓存
 //import org.springframework.cache.annotation.CacheConfig;
 //import org.springframework.cache.annotation.CacheEvict;
 //import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import java.util.List;
-import java.util.Map;
-import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import co.yixiang.domain.PageResult;
 /**
 * @author jiansun
 * @date 2023-02-15

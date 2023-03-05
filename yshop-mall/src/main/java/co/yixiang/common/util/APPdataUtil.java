@@ -87,7 +87,7 @@ public class APPdataUtil {
 
         records.setIsPersonSwitch(String.valueOf(reverse_reverse_status_binary.charAt(15)));//有人报警开关
         records.setNoPersonSwitch(String.valueOf(reverse_reverse_status_binary.charAt(14)));//无人报警开关
-        records.setFallDowmSwitch(String.valueOf(reverse_reverse_status_binary.charAt(13)));//跌倒报警开关
+        records.setFallDownSwitch(String.valueOf(reverse_reverse_status_binary.charAt(13)));//跌倒报警开关
         records.setLingerSwitch(String.valueOf(reverse_reverse_status_binary.charAt(12)));//驻留报警开关
 
         records.setLingerAlarm(String.valueOf(reverse_reverse_status_binary.charAt(5)));//驻留报警
@@ -103,7 +103,7 @@ public class APPdataUtil {
         records.setParamHight(String.valueOf(HexUtil.hexToDec(param_height_hex)));
         records.setParamLingerTime(String.valueOf(HexUtil.hexToDec(param_linger_time_hex)));
         records.setParamNoPersonTime(String.valueOf(HexUtil.hexToDec(param_no_person_time_hex)));
-        records.setParamFallDowmTime(String.valueOf(HexUtil.hexToDec(fall_down_time_hex)));//跌倒报警时长
+        records.setParamFallDownTime(String.valueOf(HexUtil.hexToDec(fall_down_time_hex)));//跌倒报警时长
         records.setParamBattery(battery_info);
 
 
@@ -147,7 +147,7 @@ public class APPdataUtil {
 
         records.setIsPersonSwitch(String.valueOf(reverse_reverse_status_binary.charAt(15)));//有人报警开关
         records.setNoPersonSwitch(String.valueOf(reverse_reverse_status_binary.charAt(14)));//无人报警开关
-        records.setFallDowmSwitch(String.valueOf(reverse_reverse_status_binary.charAt(13)));//跌倒报警开关
+        records.setFallDownSwitch(String.valueOf(reverse_reverse_status_binary.charAt(13)));//跌倒报警开关
         records.setLingerSwitch(String.valueOf(reverse_reverse_status_binary.charAt(12)));//驻留报警开关
 
         records.setLingerAlarm(String.valueOf(reverse_reverse_status_binary.charAt(5)));//驻留报警
@@ -163,7 +163,7 @@ public class APPdataUtil {
         records.setParamHight(String.valueOf(HexUtil.hexToDec(param_height_hex)));
         records.setParamLingerTime(String.valueOf(HexUtil.hexToDec(param_linger_time_hex)));
         records.setParamNoPersonTime(String.valueOf(HexUtil.hexToDec(param_no_person_time_hex)));
-        records.setParamFallDowmTime(String.valueOf(HexUtil.hexToDec(ECL)));//跌倒报警时长
+        records.setParamFallDownTime(String.valueOf(HexUtil.hexToDec(ECL)));//跌倒报警时长
         records.setParamBattery(battery_info);
 
         System.out.println(records.toString());

@@ -77,7 +77,7 @@ public class DTumbleDataRecords  {
      *跌倒报警
      * 开关0：关闭， 1：开启
      */
-    private String  fallDowmSwitch;
+    private String  fallDownSwitch;
     /**
      *驻留报警
      * 开关0：关闭， 1：开启
@@ -128,7 +128,7 @@ public class DTumbleDataRecords  {
     /**
      *跌倒报警时长05=5秒(跌倒报警时长参数说明（5~180s）)
      */
-    private String paramFallDowmTime;
+    private String paramFallDownTime;
 
     /**
      * appdata

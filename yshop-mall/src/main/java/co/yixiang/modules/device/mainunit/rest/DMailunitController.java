@@ -9,6 +9,12 @@
 package co.yixiang.modules.device.mainunit.rest;
 import java.util.Arrays;
 import co.yixiang.dozer.service.IGenerator;
+import co.yixiang.exception.BadRequestException;
+import co.yixiang.modules.device.mdevicedevice.domain.DMdeviceDevice;
+import co.yixiang.modules.device.mdevicedevice.service.DMdeviceDeviceService;
+import co.yixiang.modules.device.mdeviceuser.domain.DMdeviceUser;
+import co.yixiang.modules.device.mdeviceuser.service.DMdeviceUserService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.AllArgsConstructor;
 import co.yixiang.modules.logging.aop.log.Log;
 import co.yixiang.modules.device.mainunit.domain.DMailunit;
@@ -37,6 +43,8 @@ public class DMailunitController {
 
     private final DMailunitService dMailunitService;
     private final IGenerator generator;
+    private final DMdeviceDeviceService dMdeviceDeviceService;
+    private final DMdeviceUserService dMdeviceUserService;
 
 
     @Log("导出数据")
@@ -78,6 +86,14 @@ public class DMailunitController {
     @DeleteMapping
     public ResponseEntity<Object> deleteAll(@RequestBody Long[] ids) {
         Arrays.asList(ids).forEach(id->{
+
+            if(dMdeviceUserService.count(new LambdaQueryWrapper<DMdeviceUser>().eq(DMdeviceUser::getMid,id)) > 0){
+                throw new BadRequestException("请先解绑该主机下关联的人员");
+            }
+
+             if( dMdeviceDeviceService.count(new LambdaQueryWrapper<DMdeviceDevice>().eq(DMdeviceDevice::getMid,id))  > 0){
+                 throw new BadRequestException("请先解绑该主机下关联的其他设备");
+             }
             dMailunitService.removeById(id);
         });
         return new ResponseEntity<>(HttpStatus.OK);

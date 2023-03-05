@@ -28,7 +28,7 @@ public class SArticleQueryCriteria{
 
     /** 精确 */
     @Query
-    private String type;
+    private Integer type;
 
     /** 精确 */
     @Query

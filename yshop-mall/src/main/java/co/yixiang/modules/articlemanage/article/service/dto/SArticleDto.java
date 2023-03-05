@@ -30,7 +30,7 @@ public class SArticleDto implements Serializable {
     private String title;
 
     /** 文章类型 */
-    private String type;
+    private Integer type;
 
     /** 正文 */
     private String content;

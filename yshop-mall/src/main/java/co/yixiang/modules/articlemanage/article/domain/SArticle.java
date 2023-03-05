@@ -29,10 +29,10 @@ import co.yixiang.domain.BaseDomain;
 public class SArticle  {
 
     // 养生帮助
-    public static final String ARTICLE_TYPE_HEALTH = "0";
+    public static final int ARTICLE_TYPE_HEALTH = 1;
 
     //帮助中心
-    public static final String ARTICLE_TYPE_HELP = "1";
+    public static final int ARTICLE_TYPE_HELP = 2;
 
 
     @TableId
@@ -46,8 +46,8 @@ public class SArticle  {
     private String title;
 
     /** 文章类型 */
-    @NotBlank
-    private String type;
+    @NotNull
+    private Integer type;
 
     /** 正文 */
     @NotBlank

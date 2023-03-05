@@ -1,17 +1,30 @@
-package co.yixiang.modules.health.rest;
+package co.yixiang.modules.terminal.rest;
 
 import co.yixiang.api.ApiResult;
-import co.yixiang.common.interceptor.AuthCheck;
-import co.yixiang.modules.articlemanage.article.domain.SArticle;
-import co.yixiang.modules.articlemanage.article.service.SArticleService;
+import co.yixiang.api.YshopException;
+import co.yixiang.common.util.RedisContans;
+import co.yixiang.modules.device.balance.service.DBalanceService;
+import co.yixiang.modules.device.balance.service.dto.DBalanceDto;
+import co.yixiang.modules.device.balancedatarecords.domain.DBalanceDataRecords;
+import co.yixiang.modules.device.balancedatarecords.service.DBalanceDataRecordsService;
+import co.yixiang.modules.device.bloodsugardatarecords.domain.DBloodSugarDataRecords;
+import co.yixiang.modules.device.bloodsugardatarecords.service.DBloodSugarDataRecordsService;
+import co.yixiang.modules.device.ecg.service.DEcgService;
+import co.yixiang.modules.device.ecg.service.dto.DEcgDto;
+import co.yixiang.modules.device.mainunit.domain.DMailunit;
+import co.yixiang.modules.device.mainunit.service.DMailunitService;
 import co.yixiang.modules.device.watchuricdatarecords.service.dto.DWatchUricDataRecordsDto;
 import co.yixiang.modules.health.service.HealthSummaryService;
 import co.yixiang.modules.logging.aop.log.AppLog;
+import co.yixiang.utils.StringUtils;
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
@@ -21,23 +34,30 @@ import java.util.Map;
 
 /**
  * @author sunjian
- * @Date 2023/2/26
+ * @Date 2023/3/.
  * @license 版权所有，非经许可请勿使用本代码
  */
 @Slf4j
 @RestController()
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Api(value = "健康数据统计", tags = "健康数据统计")
-@RequestMapping("/health")
-public class HealthSummaryController {
+@Api(value = "终端主机接口", tags = "终端主机接口")
+@RequestMapping("/terminal")
+public class TerminalController {
 
 
     private final HealthSummaryService healthSummaryService;
-    private final SArticleService sArticleService;
+    private final DMailunitService dMailunitService;
+    private final DBalanceService dBalanceService;
+    private final co.yixiang.modules.blood.service.DBloodService dBloodService;
+    private final DEcgService dEcgService;
+    private final DBalanceDataRecordsService dBalanceDataRecordsService;
+    private final DBloodSugarDataRecordsService dBloodSugarDataRecordsService;
 
 
 
-    @AuthCheck
+
+
+
     @GetMapping(value = "/getSleepDataByDay")
     @AppLog("按天查询睡眠数据")
     @ApiOperation("按天查询睡眠数据")
@@ -50,7 +70,6 @@ public class HealthSummaryController {
     }
 
 
-    @AuthCheck
     @GetMapping(value = "/getBloodPreasureByDay")
     @AppLog("按天查询血压数据")
     @ApiOperation("按天查询血压数据")
@@ -63,7 +82,6 @@ public class HealthSummaryController {
     }
 
 
-    @AuthCheck
     @GetMapping(value = "/getHeartRateByDay")
     @AppLog("按天查询心率数据")
     @ApiOperation("按天查询心率数据")
@@ -76,7 +94,6 @@ public class HealthSummaryController {
     }
 
 
-    @AuthCheck
     @GetMapping(value = "/getOxygenByDay")
     @AppLog("按天查询血氧数据")
     @ApiOperation("按天查询血氧数据")
@@ -89,7 +106,6 @@ public class HealthSummaryController {
     }
 
 
-    @AuthCheck
     @GetMapping(value = "/getTemperatureByDay")
     @AppLog("按天查询体温数据")
     @ApiOperation("按天查询体温数据")
@@ -102,7 +118,6 @@ public class HealthSummaryController {
     }
 
 
-    @AuthCheck
     @GetMapping(value = "/getWeightByDay")
     @AppLog("按天查询体重数据")
     @ApiOperation("按天查询体重数据")
@@ -115,11 +130,10 @@ public class HealthSummaryController {
     }
 
 
-    @AuthCheck
     @GetMapping(value = "/getBloodSugarByDay")
     @AppLog("按天查询血糖数据")
     @ApiOperation("按天查询血糖数据")
-    public ApiResult<List<Map>> getBloodByDay(@RequestParam("day") Date day, @RequestParam("uid") Long uid){
+    public ApiResult<List<Map>> getBloodSugarByDay(@RequestParam("day") Date day, @RequestParam("uid") Long uid){
         //Long uid = LocalUser.getUser().getUid();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String dayStr = simpleDateFormat.format(day);
@@ -127,7 +141,6 @@ public class HealthSummaryController {
         return  ApiResult.ok(list);
     }
 
-    @AuthCheck
     @GetMapping(value = "/getPulseRateByDay")
     @AppLog("按天查询脉搏数据")
     @ApiOperation("按天查询脉搏数据")
@@ -140,7 +153,8 @@ public class HealthSummaryController {
     }
 
 
-    @AuthCheck
+
+
     @GetMapping(value = "/getEcgByDay")
     @AppLog("按天查询心电图数据")
     @ApiOperation("按天查询心电图数据")
@@ -153,7 +167,6 @@ public class HealthSummaryController {
     }
 
 
-    @AuthCheck
     @GetMapping(value = "/getUricAcidByDay")
     @AppLog("按天查尿酸数据")
     @ApiOperation("按天查尿酸数据")
@@ -165,8 +178,6 @@ public class HealthSummaryController {
         return  ApiResult.ok(list);
     }
 
-
-    @AuthCheck
     @GetMapping(value = "/getFallDownByDay")
     @AppLog("按天查跌倒数据")
     @ApiOperation("按天查跌倒数据")
@@ -179,40 +190,111 @@ public class HealthSummaryController {
     }
 
 
+    @GetMapping(value = "/test")
+    public ApiResult<Long> test(){
 
-
-
-
-
-    @AuthCheck
-    @GetMapping(value = "/getHealthArticleTop5")
-    @AppLog("查询前5条健康养生文章")
-    @ApiOperation("查询前5条健康养生文章")
-    public ApiResult<List<SArticle>> getHealthArticleTop5(){
-        //Long uid = LocalUser.getUser().getUid();
-        List<SArticle> list = healthSummaryService.getHealthArticlesForPage(0,5);
-        return  ApiResult.ok(list);
+        Long x = System.currentTimeMillis();
+//        if(0==0){
+//
+//            throw new YshopException("参数非法");
+//        }
+        return  ApiResult.ok(x);
     }
 
-    @AuthCheck
-    @GetMapping(value = "/getHealthArticlePage")
-    @AppLog("查询健康养生文章分页数据")
-    @ApiOperation("查询健康养生文章分页数据")
-    public ApiResult<List<SArticle>> getHealthArticlePage(@RequestParam("start") Integer start, @RequestParam("pageSize") Integer pageSize){
-        //Long uid = LocalUser.getUser().getUid();
-        List<SArticle> list = healthSummaryService.getHealthArticlesForPage(start,pageSize);
-        return  ApiResult.ok(list);
+
+    @GetMapping(value = "/getUsers")
+    @AppLog("查询该主机绑定的可登录用户")
+    @ApiOperation("查询该主机绑定的可登录用户")
+    public ApiResult<List<Map>> getUsers(@RequestParam("imei") String imei){
+        if(StringUtils.isEmpty(imei)){
+            throw new YshopException("imei不能为空");
+        }
+        List<Map> users = healthSummaryService.getUsersByDmainUnitImei(imei);
+        return  ApiResult.ok(users);
     }
 
-    @AuthCheck
-    @GetMapping(value = "/getHealthArticle/{id}")
-    @AppLog("根据ID查询健康养生文章内容")
-    @ApiOperation("根据ID查询健康养生文章内容")
-    public ApiResult<SArticle> getHealthArticle(@PathVariable("id") Long id){
-        //Long uid = LocalUser.getUser().getUid();
-        SArticle article = sArticleService.getById(id);
-        return  ApiResult.ok(article);
+    @PostMapping(value = "/changeCurrentUser")
+    @AppLog("切换主机当前端登录人")
+    @ApiOperation("切换主机当前端登录人")
+    public ApiResult<Boolean> changeCurrentUser(@RequestParam("imei") String imei,@RequestParam("uid") Long uid){
+        if(StringUtils.isEmpty(imei)){
+            throw new YshopException("imei不能为空");
+        }
+        if(null == uid){
+            throw new YshopException("uid不能为空");
+        }
+        RedisContans.setTerminalCurrentUserId(imei,uid);
+
+        System.out.println(RedisContans.getTerminalCurrentUserId(imei));
+
+        //TODO
+        //通过MQTT 给这台主机推送最新的健康测量数据
+
+
+        return  ApiResult.ok();
     }
+
+
+
+    @GetMapping(value = "/getDevices")
+    @AppLog("查询这台主机可连接的其他设备")
+    @ApiOperation("查询这台主机可连接的其他设备")
+    public ApiResult<JSONObject> getDevices(@RequestParam("imei") String imei){
+        if(StringUtils.isEmpty(imei)){
+            throw new YshopException("url地址中imei不能为空");
+        }
+        DMailunit m = dMailunitService.getOne(new LambdaQueryWrapper<DMailunit>().eq(DMailunit::getImei,imei));
+        if(m == null){
+            throw new YshopException("该主机设备不存在,请联系平台管理员");
+        }
+
+        List<co.yixiang.modules.blood.service.dto.DBloodDto> bloodDeviceList  =  dBloodService.queryAllBindedDeviceByMid(m.getId());
+        List<DBalanceDto> blalanceDeviceList = dBalanceService.queryAllBindedDeviceByMid(m.getId());
+        List<DEcgDto> ecgDeviceList = dEcgService.queryAllBindedDeviceByMid(m.getId());
+        JSONObject result = new JSONObject();
+
+        result.put("bloodDeviceList",bloodDeviceList);
+        result.put("blalanceDeviceList",bloodDeviceList);
+        result.put("ecgDeviceList",bloodDeviceList);
+
+        return  ApiResult.ok(result);
+    }
+
+
+
+
+
+
+
+    @PostMapping(value = "/saveBloodSugarData")
+    @AppLog("保存血糖仪检测结果")
+    @ApiOperation("保存血糖仪检测结果")
+    public ApiResult<String> saveBloodSugarData(@Validated @RequestBody DBloodSugarDataRecords resources){
+        try {
+            dBloodSugarDataRecordsService.save(resources);
+        }catch (Exception e){
+            return ApiResult.fail(e.getMessage());
+        }
+        return  ApiResult.ok("保存成功");
+    }
+
+
+
+    @PostMapping(value = "/saveBalanceData")
+    @AppLog("保存体脂秤检测结果")
+    @ApiOperation("保存体脂秤检测结果")
+    public ApiResult<String> saveBalanceData(@Validated @RequestBody DBalanceDataRecords resources){
+        try {
+            dBalanceDataRecordsService.save(resources);
+        }catch (Exception e){
+            return ApiResult.fail(e.getMessage());
+        }
+        return  ApiResult.ok("保存成功");
+    }
+
+
+
+
 
 
 }

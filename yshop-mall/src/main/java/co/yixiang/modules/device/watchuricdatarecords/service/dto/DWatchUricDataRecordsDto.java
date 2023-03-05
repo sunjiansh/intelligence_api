@@ -8,6 +8,7 @@
 */
 package co.yixiang.modules.device.watchuricdatarecords.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
@@ -74,8 +75,14 @@ public class DWatchUricDataRecordsDto implements Serializable {
     /** 入睡时间戳 */
     private Long sleepDown;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone="GMT+8")
+    private Date sleepDownTime;
+
     /** 出睡时间戳 */
     private Long sleepUp;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone="GMT+8")
+    private Date sleepUpTime;
 
     /** 血氧 */
     private Double oxygen;
