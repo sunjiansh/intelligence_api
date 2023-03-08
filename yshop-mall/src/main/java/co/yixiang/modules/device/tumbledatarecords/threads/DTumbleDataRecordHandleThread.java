@@ -100,13 +100,13 @@ public class DTumbleDataRecordHandleThread implements Runnable{
         String  mainUnitImei = yxUserMapper.findMainUnitImeiByTumbleImei(imei);
         //TODO 2、用users和redis中主机当前登陆人匹配，匹配上谁。本次上传的数据就算是谁的
         //正式上线后解开下面的代码
-//        Long userId = RedisContans.getTerminalCurrentUserId(mainUnitImei);
-//        if(userId == null){
-//            log.error("该跌倒报警的用户没有在主机端登录过，不予上报数据！主机imei:"+mainUnitImei);
-//            return;
-//        }
+        Long userId = RedisContans.getTerminalCurrentUserId(mainUnitImei);
+        if(userId == null){
+            log.error("该跌倒报警的用户没有在主机端登录过，不予上报数据！跌倒报警器imei:"+imei);
+            return;
+        }
 
-        Long userId = 1L;
+       // Long userId = 1L;
 
         //TODO 3、根据uid验证终端设备是否有权限上传数据
         YxUser user = yxUserMapper.selectById(userId);
@@ -181,17 +181,7 @@ public class DTumbleDataRecordHandleThread implements Runnable{
 
 
         if("1".equals(records.getIsPersonAlarm())){
-            //将数据发送到mqtt
-            JSONObject msg = new JSONObject();
-            msg.put("userId",records.getUserId());
-            msg.put("time",records.getPushTime());
-            msg.put("content","有人");
-            msg.put("action","ALARM");
-            try {
-                ServerMQTT.publishTerminalData(mainUnitImei,msg);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
+
 
             //TODO 保存一条报警信息,这个逻辑应该放在SOS报警的地方
             YxUser user  = yxUserMapper.selectById(records.getUserId());
@@ -218,6 +208,20 @@ public class DTumbleDataRecordHandleThread implements Runnable{
                 log.error("保存SOS报警记录失败！"+e.getMessage());
             }
 
+
+
+            //将数据发送到mqtt
+            JSONObject msg = new JSONObject();
+            msg.put("userId",records.getUserId());
+            msg.put("pushTime",records.getPushTime());
+            msg.put("content","有人");
+            msg.put("sos",watch.getSos());
+            msg.put("action","ISPERSON");
+            try {
+                ServerMQTT.publishTerminalData(mainUnitImei,msg);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
 
 
@@ -225,11 +229,40 @@ public class DTumbleDataRecordHandleThread implements Runnable{
 
 
       if("1".equals(records.getFallDownAlarm())){
+
+          //TODO 保存一条报警信息,这个逻辑应该放在SOS报警的地方
+          YxUser user  = yxUserMapper.selectById(records.getUserId());
+          co.yixiang.modules.watch.domain.DWatch watch = dWatchService.getOne(new LambdaQueryWrapper<DWatch>().eq(DWatch::getImei,user.getImei()));
+          SVipSosRecord sVipSosRecord = new SVipSosRecord();
+          Date now = new Date();
+          sVipSosRecord.setMemberId(user.getUid());
+          sVipSosRecord.setMemberName(user.getRealName());
+          sVipSosRecord.setMemberPhone(user.getPhone());
+          sVipSosRecord.setSosTime(now);
+          sVipSosRecord.setServiceEndTime(user.getServiceEnd());
+          sVipSosRecord.setSosContact(watch==null?"没有绑定手环，无SOS联系人":watch.getSos());
+          if(user.getServiceEnd() != null){
+              if(now.before(user.getServiceEnd())){
+                  int days = DateUtils.differentDaysByMillisecond(now,user.getServiceEnd());
+                  sVipSosRecord.setLastDays(days > 0?days:0);
+              }else{
+                  sVipSosRecord.setLastDays(0);
+              }
+          }
+          try {
+              sVipSosRecordService.save(sVipSosRecord);
+          }catch (Exception e){
+              log.error("保存SOS报警记录失败！"+e.getMessage());
+          }
+
+
+
           //将数据发送到mqtt
           JSONObject msg = new JSONObject();
           msg.put("userId",records.getUserId());
-          msg.put("time",records.getPushTime());
+          msg.put("pushTime",records.getPushTime());
           msg.put("content","有人跌倒");
+          msg.put("sos",watch.getSos());
           msg.put("action","ALARM");
           try {
               ServerMQTT.publishTerminalData(mainUnitImei,msg);
@@ -237,34 +270,6 @@ public class DTumbleDataRecordHandleThread implements Runnable{
               e.printStackTrace();
           }
       }
-
-        //TODO 保存一条报警信息,这个逻辑应该放在SOS报警的地方
-        YxUser user  = yxUserMapper.selectById(records.getUserId());
-        co.yixiang.modules.watch.domain.DWatch watch = dWatchService.getOne(new LambdaQueryWrapper<DWatch>().eq(DWatch::getImei,user.getImei()));
-        SVipSosRecord sVipSosRecord = new SVipSosRecord();
-        Date now = new Date();
-        sVipSosRecord.setMemberId(user.getUid());
-        sVipSosRecord.setMemberName(user.getRealName());
-        sVipSosRecord.setMemberPhone(user.getPhone());
-        sVipSosRecord.setSosTime(now);
-        sVipSosRecord.setServiceEndTime(user.getServiceEnd());
-        sVipSosRecord.setSosContact(watch==null?"没有绑定手环，无SOS联系人":watch.getSos());
-        if(user.getServiceEnd() != null){
-            if(now.before(user.getServiceEnd())){
-                int days = DateUtils.differentDaysByMillisecond(now,user.getServiceEnd());
-                sVipSosRecord.setLastDays(days > 0?days:0);
-            }else{
-                sVipSosRecord.setLastDays(0);
-            }
-        }
-        try {
-            sVipSosRecordService.save(sVipSosRecord);
-        }catch (Exception e){
-            log.error("保存SOS报警记录失败！"+e.getMessage());
-        }
-
-
-
 
         dTumbleDataRecordsMapper.insert(records);
     }

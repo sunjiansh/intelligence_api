@@ -133,7 +133,7 @@ public class DWatchUricApiService {
 
      //   RequestBody body = RequestBody.create(mediaType, "{\r\n    \"userConfig\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"sleepSwitch\":1,\r\n        \"sleepTimeStart\":\"23:00\",\r\n        \"sleepTimeEnd\":\"08:00\"\r\n    },\r\n    \"sendBody\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"cmd\":\"BP96\"\r\n    }\r\n}");
         Request request = new Request.Builder()
-                .url("https://api-xintai-beta.colofoo.com/openapi/device/updateConfig")
+                .url(url+"/device/updateConfig")
                 .post(body)
                 .addHeader("appId", appId)
                 .addHeader("appSecret", appSecret)
@@ -169,7 +169,7 @@ public class DWatchUricApiService {
         RequestBody body = RequestBody.create(mediaType, bodyJson.toJSONString());
 
         Request request = new Request.Builder()
-                .url("https://api-xintai-beta.colofoo.com/openapi/device/updateConfig")
+                .url(url+"/device/updateConfig")
                 .post(body)
                 .addHeader("appId", appId)
                 .addHeader("appSecret", appSecret)
@@ -207,7 +207,7 @@ public class DWatchUricApiService {
         RequestBody body = RequestBody.create(mediaType, bodyJson.toJSONString());
 
         Request request = new Request.Builder()
-                .url("https://api-xintai-beta.colofoo.com/openapi/device/updateConfig")
+                .url(url+"/device/updateConfig")
                 .post(body)
                 .addHeader("appId", appId)
                 .addHeader("appSecret", appSecret)
@@ -244,7 +244,7 @@ public class DWatchUricApiService {
         RequestBody body = RequestBody.create(mediaType, bodyJson.toJSONString());
 
         Request request = new Request.Builder()
-                .url("https://api-xintai-beta.colofoo.com/openapi/device/updateConfig")
+                .url(url+"/device/updateConfig")
                 .post(body)
                 .addHeader("appId", appId)
                 .addHeader("appSecret", appSecret)
@@ -287,7 +287,7 @@ public class DWatchUricApiService {
 
         //   RequestBody body = RequestBody.create(mediaType, "{\r\n    \"userConfig\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"sleepSwitch\":1,\r\n        \"sleepTimeStart\":\"23:00\",\r\n        \"sleepTimeEnd\":\"08:00\"\r\n    },\r\n    \"sendBody\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"cmd\":\"BP96\"\r\n    }\r\n}");
         Request request = new Request.Builder()
-                .url("https://api-xintai-beta.colofoo.com/openapi/device/updateConfig")
+                .url(url+"/device/updateConfig")
                 .post(body)
                 .addHeader("appId", appId)
                 .addHeader("appSecret", appSecret)
@@ -328,7 +328,7 @@ public class DWatchUricApiService {
 
         //   RequestBody body = RequestBody.create(mediaType, "{\r\n    \"userConfig\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"sleepSwitch\":1,\r\n        \"sleepTimeStart\":\"23:00\",\r\n        \"sleepTimeEnd\":\"08:00\"\r\n    },\r\n    \"sendBody\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"cmd\":\"BP96\"\r\n    }\r\n}");
         Request request = new Request.Builder()
-                .url("https://api-xintai-beta.colofoo.com/openapi/device/updateConfig")
+                .url(url+"/device/updateConfig")
                 .post(body)
                 .addHeader("appId", appId)
                 .addHeader("appSecret", appSecret)
@@ -366,7 +366,7 @@ public class DWatchUricApiService {
 
         //   RequestBody body = RequestBody.create(mediaType, "{\r\n    \"userConfig\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"sleepSwitch\":1,\r\n        \"sleepTimeStart\":\"23:00\",\r\n        \"sleepTimeEnd\":\"08:00\"\r\n    },\r\n    \"sendBody\":{\r\n        \"imei\":\"356221322018563\",\r\n        \"cmd\":\"BP96\"\r\n    }\r\n}");
         Request request = new Request.Builder()
-                .url("https://api-xintai-beta.colofoo.com/openapi/device/updateConfig")
+                .url(url+"/device/updateConfig")
                 .post(body)
                 .addHeader("appId", appId)
                 .addHeader("appSecret", appSecret)
@@ -437,6 +437,27 @@ public class DWatchUricApiService {
     }
 
 
+    /**
+     * 获取用户当前综合健康状态
+     * @param userId
+     * @return
+     * @throws Exception
+     */
+    public JSONObject getRiskStateById(Long userId) throws Exception{
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(url+"/health/user/cur/state?uid="+userId)
+                .get()
+                .addHeader("appId", appId)
+                .addHeader("appSecret", appSecret)
+                .build();
+        Response response = client.newCall(request).execute();
+        JSONObject jsonResult = (JSONObject) JSONObject.parse(response.body().string());
+        System.out.println(jsonResult);
+        return jsonResult;
+    }
+
+
 
 
     /**
@@ -454,7 +475,7 @@ public class DWatchUricApiService {
         RequestBody body = RequestBody.create(mediaType, bodyJson.toJSONString());
         // RequestBody body = RequestBody.create(mediaType, "{\r\n\t\"uid\": \"20221227001\",\r\n\t\"imei\": \"356221322018563\"\r\n}");
         Request request = new Request.Builder()
-                .url("https://api-xintai.colofoo.com/openapi/device/bsDevice/add")
+                .url(url+"/device/bsDevice/add")
                 .post(body)
                 .addHeader("appId", appId)
                 .addHeader("appSecret", appSecret)
@@ -480,7 +501,7 @@ public class DWatchUricApiService {
         RequestBody body = RequestBody.create(mediaType, bodyJson.toJSONString());
        // RequestBody body = RequestBody.create(mediaType, "{\r\n    \"uid\":\"1\"\r\n}");
         Request request = new Request.Builder()
-                .url("https://api-xintai.colofoo.com/openapi/device/bsDevice/del")
+                .url(url+"/device/bsDevice/del")
                 .post(body)
                 .addHeader("appId", appId)
                 .addHeader("appSecret", appSecret)
@@ -491,6 +512,7 @@ public class DWatchUricApiService {
         System.out.println(jsonResult);
         return jsonResult;
     }
+
 
 
 
@@ -516,7 +538,7 @@ public class DWatchUricApiService {
         RequestBody body = RequestBody.create(mediaType, list.toJSONString());
         //RequestBody body = RequestBody.create(mediaType, "[{\r\n  \"sbp\": 110,\r\n  \"dbp\": 50,\r\n  \"uid\": \"1\",\r\n  \"recordTime\": \"1625885067101\",\r\n  \"measureMode\": 1\r\n}]");
         Request request = new Request.Builder()
-                .url("https://api-xintai-beta.colofoo.com/openapi/bp/upload/batch")
+                .url(url+"/bp/upload/batch")
                 .post(body)
                 .addHeader("appId", appId)
                 .addHeader("appSecret", appSecret)
@@ -548,7 +570,7 @@ public class DWatchUricApiService {
 
         //RequestBody body = RequestBody.create(mediaType, "[{\r\n  \"heartRate\": 110,\r\n  \"uid\": \"1\",\r\n  \"recordTime\": \"1625885067101\",\r\n  \"measureMode\": 1\r\n}]");
         Request request = new Request.Builder()
-                .url("https://api-xintai-beta.colofoo.com/openapi/heart/upload/batch")
+                .url(url+"/heart/upload/batch")
                 .post(body)
                 .addHeader("appId", appId)
                 .addHeader("appSecret", appSecret)
@@ -588,7 +610,7 @@ public class DWatchUricApiService {
 
        // RequestBody body = RequestBody.create(mediaType, "[{\r\n    \"allSleepTime\": 90,\r\n    \"sleepDate\": \"2021-11-24\",\r\n    \"lowSleepTime\" : 80,\r\n    \"deepSleepTime\" : 80,\r\n    \"sleepLine\" : \"\",\r\n    \"sleepQuality\" : 2,\r\n    \"wakeCount\": 2,\r\n    \"sleepDown\": 1625885067102,\r\n    \"sleepUp\": 1625885067102,\r\n    \"uid\": \"11\",\r\n    \"recordTime\": \"1625885067102\",\r\n    \"measureMode\": 1\r\n}]");
         Request request = new Request.Builder()
-                .url("https://api-xintai-beta.colofoo.com/openapi/sleep/upload/batch")
+                .url(url+"/sleep/upload/batch")
                 .post(body)
                 .addHeader("appId", appId)
                 .addHeader("appSecret", appSecret)
@@ -621,7 +643,7 @@ public class DWatchUricApiService {
 
         //RequestBody body = RequestBody.create(mediaType, "[{\r\n    \"temperature\": 36.8,\r\n    \"uid\": \"11\",\r\n    \"recordTime\": \"1625885067102\",\r\n    \"measureMode\": 1\r\n}]");
         Request request = new Request.Builder()
-                .url("https://api-xintai-beta.colofoo.com/openapi/tw/upload/batch")
+                .url(url+"/tw/upload/batch")
                 .post(body)
                 .addHeader("appId", appId)
                 .addHeader("appSecret", appSecret)
@@ -653,7 +675,7 @@ public class DWatchUricApiService {
 
         //RequestBody body = RequestBody.create(mediaType, "[{\r\n    \"ghb\": 11.11,\r\n    \"uid\": \"11\",\r\n    \"recordTime\": \"1625885067102\",\r\n    \"timePeriod\": 1\r\n}]");
         Request request = new Request.Builder()
-                .url("https://api-xintai-beta.colofoo.com/openapi/bs/upload/batch")
+                .url(url+"/bs/upload/batch")
                 .post(body)
                 .addHeader("appId", appId)
                 .addHeader("appSecret", appSecret)
@@ -688,7 +710,7 @@ public class DWatchUricApiService {
 
        // RequestBody body = RequestBody.create(mediaType, "[{\r\n    \"oxygen\": 90,\r\n    \"heartRate\" : 80,\r\n    \"uid\": \"11\",\r\n    \"recordTime\": \"1625885067102\",\r\n    \"measureMode\": 1\r\n}]");
         Request request = new Request.Builder()
-                .url("https://api-xintai-beta.colofoo.com/openapi/spo2/upload/batch")
+                .url(url+"/spo2/upload/batch")
                 .post(body)
                 .addHeader("appId", appId)
                 .addHeader("appSecret", appSecret)

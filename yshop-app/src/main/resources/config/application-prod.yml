@@ -90,8 +90,8 @@ swagger:
 
 # 文件存储路径
 file:
-  path: C:/intelligence/localfile/file/
-  avatar: C:/intelligence/localfile/avatar/
+  path: C:\intelligence\localfile/file\
+  avatar: C:\intelligence\localfile\avatar\
   # 文件大小 /M
   maxSize: 100
   avatarMaxSize: 5

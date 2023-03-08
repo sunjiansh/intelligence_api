@@ -1,10 +1,7 @@
 package co.yixiang.modules.health.service;
 
 import co.yixiang.modules.articlemanage.article.domain.SArticle;
-import co.yixiang.modules.device.watchuricdatarecords.domain.DWatchUricDataRecords;
 import co.yixiang.modules.device.watchuricdatarecords.service.dto.DWatchUricDataRecordsDto;
-import org.apache.ibatis.annotations.Param;
-import org.apache.xmlbeans.impl.xb.xsdschema.LocalSimpleType;
 
 import java.util.List;
 import java.util.Map;
@@ -35,13 +32,14 @@ public interface HealthSummaryService  {
 
     List<Map> getPulseRateByDay(String day, Long uid);
 
-    List<Map> getEcgByDay(String day, Long uid);
-
     List<Map> getUricAcidByDay(String day, Long uid);
 
     List<Map> getFallDownByDay(String day, Long uid);
 
+    List<Map> getEcgDataRecords(Long uid);
 
-    List<Map> getUsersByDmainUnitImei(String imei);
+    List<Map<String,Object>> getUsersByDmainUnitImei(String imei);
+
+    Map<String,Map<String,Object>> getAndPushAllHealthRecordData(String imei,Long uid);
 
 }

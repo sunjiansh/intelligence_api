@@ -11,6 +11,8 @@ import co.yixiang.modules.device.bloodsugardatarecords.domain.DBloodSugarDataRec
 import co.yixiang.modules.device.bloodsugardatarecords.service.DBloodSugarDataRecordsService;
 import co.yixiang.modules.device.ecg.service.DEcgService;
 import co.yixiang.modules.device.ecg.service.dto.DEcgDto;
+import co.yixiang.modules.device.ecgdatarecords.domain.DEcgDataRecords;
+import co.yixiang.modules.device.ecgdatarecords.service.DEcgDataRecordsService;
 import co.yixiang.modules.device.mainunit.domain.DMailunit;
 import co.yixiang.modules.device.mainunit.service.DMailunitService;
 import co.yixiang.modules.device.watchuricdatarecords.service.dto.DWatchUricDataRecordsDto;
@@ -24,6 +26,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,7 +55,7 @@ public class TerminalController {
     private final DEcgService dEcgService;
     private final DBalanceDataRecordsService dBalanceDataRecordsService;
     private final DBloodSugarDataRecordsService dBloodSugarDataRecordsService;
-
+    private final DEcgDataRecordsService dEcgDataRecordsService;
 
 
 
@@ -154,19 +157,6 @@ public class TerminalController {
 
 
 
-
-    @GetMapping(value = "/getEcgByDay")
-    @AppLog("按天查询心电图数据")
-    @ApiOperation("按天查询心电图数据")
-    public ApiResult<List<Map>> getEcgByDay(@RequestParam("day") Date day, @RequestParam("uid") Long uid){
-        //Long uid = LocalUser.getUser().getUid();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String dayStr = simpleDateFormat.format(day);
-        List<Map> list = healthSummaryService.getEcgByDay(dayStr,uid);
-        return  ApiResult.ok(list);
-    }
-
-
     @GetMapping(value = "/getUricAcidByDay")
     @AppLog("按天查尿酸数据")
     @ApiOperation("按天查尿酸数据")
@@ -190,6 +180,18 @@ public class TerminalController {
     }
 
 
+    @GetMapping(value = "/getEcgDataRecords")
+    @AppLog("查询心电图测量记录数据")
+    @ApiOperation("查询心电图测量记录数据")
+    public ApiResult<List<Map>> getEcgDataRecords(@RequestParam("uid") Long uid){
+        //Long uid = LocalUser.getUser().getUid();
+        List<Map> list = healthSummaryService.getEcgDataRecords(uid);
+        return  ApiResult.ok(list);
+    }
+
+
+
+
     @GetMapping(value = "/test")
     public ApiResult<Long> test(){
 
@@ -205,11 +207,11 @@ public class TerminalController {
     @GetMapping(value = "/getUsers")
     @AppLog("查询该主机绑定的可登录用户")
     @ApiOperation("查询该主机绑定的可登录用户")
-    public ApiResult<List<Map>> getUsers(@RequestParam("imei") String imei){
+    public ApiResult<List<Map<String,Object>>> getUsers(@RequestParam("imei") String imei){
         if(StringUtils.isEmpty(imei)){
             throw new YshopException("imei不能为空");
         }
-        List<Map> users = healthSummaryService.getUsersByDmainUnitImei(imei);
+        List<Map<String,Object>> users = healthSummaryService.getUsersByDmainUnitImei(imei);
         return  ApiResult.ok(users);
     }
 
@@ -225,11 +227,10 @@ public class TerminalController {
         }
         RedisContans.setTerminalCurrentUserId(imei,uid);
 
-        System.out.println(RedisContans.getTerminalCurrentUserId(imei));
+        //System.out.println(RedisContans.getTerminalCurrentUserId(imei));
 
-        //TODO
         //通过MQTT 给这台主机推送最新的健康测量数据
-
+        healthSummaryService.getAndPushAllHealthRecordData(imei,uid);
 
         return  ApiResult.ok();
     }
@@ -266,12 +267,16 @@ public class TerminalController {
 
 
 
-    @PostMapping(value = "/saveBloodSugarData")
+    @PostMapping(value = "/saveBloodSugarData/{imei}")
     @AppLog("保存血糖仪检测结果")
     @ApiOperation("保存血糖仪检测结果")
-    public ApiResult<String> saveBloodSugarData(@Validated @RequestBody DBloodSugarDataRecords resources){
+    public ApiResult<String> saveBloodSugarData(@PathVariable("imei") String imei,@Validated @RequestBody DBloodSugarDataRecords resources){
         try {
-            dBloodSugarDataRecordsService.save(resources);
+            dBloodSugarDataRecordsService.saveEntity(resources,imei);
+
+            //通过MQTT 给这台主机推送最新的健康测量数据
+            healthSummaryService.getAndPushAllHealthRecordData(imei,resources.getUid());
+
         }catch (Exception e){
             return ApiResult.fail(e.getMessage());
         }
@@ -280,12 +285,34 @@ public class TerminalController {
 
 
 
-    @PostMapping(value = "/saveBalanceData")
+    @PostMapping(value = "/saveBalanceData/{imei}")
     @AppLog("保存体脂秤检测结果")
     @ApiOperation("保存体脂秤检测结果")
-    public ApiResult<String> saveBalanceData(@Validated @RequestBody DBalanceDataRecords resources){
+    public ApiResult<String> saveBalanceData(@PathVariable("imei") String imei,@Validated @RequestBody DBalanceDataRecords resources){
         try {
-            dBalanceDataRecordsService.save(resources);
+            dBalanceDataRecordsService.saveEntity(resources,imei);
+
+            //通过MQTT 给这台主机推送最新的健康测量数据
+            healthSummaryService.getAndPushAllHealthRecordData(imei,resources.getUid());
+
+        }catch (Exception e){
+            return ApiResult.fail(e.getMessage());
+        }
+        return  ApiResult.ok("保存成功");
+    }
+
+
+
+    @PostMapping(value = "/saveEcgData/{imei}")
+    @AppLog("保存心电图检测结果")
+    @ApiOperation("保存心电图检测结果")
+    public ApiResult<String> saveEcgData(@PathVariable("imei") String imei,@Validated @RequestBody DEcgDataRecords resources){
+        try {
+          dEcgDataRecordsService.saveEntity(resources,imei);
+
+            //通过MQTT 给这台主机推送最新的健康测量数据
+            healthSummaryService.getAndPushAllHealthRecordData(imei,resources.getUid());
+
         }catch (Exception e){
             return ApiResult.fail(e.getMessage());
         }

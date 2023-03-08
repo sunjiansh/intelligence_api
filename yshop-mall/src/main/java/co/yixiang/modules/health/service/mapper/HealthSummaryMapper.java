@@ -69,18 +69,74 @@ public interface HealthSummaryMapper  extends CoreMapper {
         List<Map> queryFallDownByDay(@Param("day") String day, @Param("uid") Long uid);
 
 
-        // TODO 待拿到心电图数据后再展示
-        @Select("select * from view_temperature_records where userId=#{uid} and pushDay = #{day} ")
-        List<Map> queryEcgByDay(@Param("day") String day, @Param("uid") Long uid);
-
+        // 心电图数据
+        @Select("select * from view_ecg_data_records where userId=#{uid} limit 20 ")
+        List<Map> queryEcgDataRecords(@Param("uid") Long uid);
 
         /**
          * 根据主机IMEI查询绑定的用户
          * @param imei
          * @return
          */
-        @Select("select a.uid,a.real_name realName,a.phone,a.avatar from yx_user a inner join d_mdevice_user b on a.uid = b.uid inner join d_mailunit c on c.id = b.mid where a.status=1 and c.imei=#{imei} ")
-        List<Map> queryUsersByDmainUnitImei(@Param("imei") String imei);
+        @Select("select a.uid,a.real_name realName,a.phone,a.avatar,a.sex,a.age,a.sos_contact as sos from yx_user a inner join d_mdevice_user b on a.uid = b.uid inner join d_mailunit c on c.id = b.mid where a.status=1 and c.imei=#{imei} ")
+        List<Map<String,Object>> queryUsersByDmainUnitImei(@Param("imei") String imei);
+
+
+
+
+
+
+        //睡眠数据
+        @Select("select * from view_sleep_records where userId=#{uid} order by pushTime desc  limit 1 ")
+        Map<String,Object> queryLatestSleepRecord(@Param("uid") Long uid);
+
+        //血压数据
+        @Select("select * from view_blood_preasure_records where userId=#{uid} order by pushTime desc limit 1 ")
+        Map<String,Object> queryLatestBloodPreasure( @Param("uid") Long uid);
+
+        //心率数据
+        @Select("select * from view_heart_rate_records where userId=#{uid} order by pushTime desc limit 1 ")
+        Map<String,Object> queryLatestHeartRate(@Param("uid") Long uid);
+
+        //血氧数据
+        @Select("select * from view_oxygen_records where userId=#{uid} order by pushTime desc  limit 1 ")
+        Map<String,Object> queryLatestOxygen( @Param("uid") Long uid);
+
+
+        //体温数据
+        @Select("select * from view_temperature_records where userId=#{uid} order by pushTime desc limit 1 ")
+        Map<String,Object> queryLatestTemperature(@Param("uid") Long uid);
+
+
+        //体脂秤数据
+        @Select("select * from view_balance_records where userId=#{uid} order by pushTime desc limit 1 ")
+        Map<String,Object> queryLatestWeight( @Param("uid") Long uid);
+
+
+        // 血糖数据
+        @Select("select * from view_blood_sugar_records where userId=#{uid} order by pushTime desc limit 1 ")
+        Map<String,Object> queryLatestBloodSugar(@Param("uid") Long uid);
+
+        //脉搏数据
+        @Select("select * from view_pulse_rate_records where userId=#{uid} order by pushTime desc  limit 1 ")
+        Map<String,Object> queryLatestPulseRate(@Param("uid") Long uid);
+
+
+        //尿酸数据
+        @Select("select * from view_uric_acid_records where userId=#{uid} order by pushTime desc limit 1 ")
+        Map<String,Object> queryLatestUricAcid( @Param("uid") Long uid);
+
+
+        //跌倒数据
+        @Select("select * from view_fall_down_records where userId=#{uid} order by pushTime desc limit 1 ")
+        Map<String,Object> queryLatestFallDown( @Param("uid") Long uid);
+
+
+        // 心电图数据
+        @Select("select * from view_ecg_data_records where userId=#{uid} limit 1 ")
+        Map<String,Object> queryLatestEcgDataRecords(@Param("uid") Long uid);
+
+
 
 
 

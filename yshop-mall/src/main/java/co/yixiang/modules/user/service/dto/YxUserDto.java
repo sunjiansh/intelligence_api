@@ -142,6 +142,10 @@ public class YxUserDto implements Serializable {
      */
     private String sosContact;
 
+
+    /** 用户年龄 */
+    private Integer age;
+
     /**
      * 会员服务开始日期
      */

@@ -14,7 +14,7 @@ import java.io.UnsupportedEncodingException;
 public class ServerMQTT {
 
     // tcp://MQTT安装的服务器地址:MQTT定义的端口号
-    public static final String HOST = "tcp://106.15.207.77:1883";
+    public static final String HOST = "tcp://mq.jsktzx.com:1883";
     // 定义一个主题
     public static final String TOPIC = "javatopic";
     // 定义MQTT的ID，能够在MQTT服务配置中指定
@@ -148,7 +148,7 @@ public class ServerMQTT {
         try {
             client = getDataTopicServer(imei);
             MqttMessage message = new MqttMessage();
-            message.setQos(0);// 0最多一次，1 至少一次，2 仅一次
+            message.setQos(1);// 0最多一次，1 至少一次，2 仅一次
            // message.setRetained(true);
             message.setPayload(jsonMsg.toJSONString().getBytes("UTF-8"));
             client.publish(TERMINAL_DATA_TOPIC+imei,message);

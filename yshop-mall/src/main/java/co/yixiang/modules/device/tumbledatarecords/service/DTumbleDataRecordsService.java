@@ -13,7 +13,6 @@ import co.yixiang.domain.PageResult;
 import co.yixiang.modules.device.tumbledatarecords.domain.DTumbleDataRecords;
 import co.yixiang.modules.device.tumbledatarecords.service.dto.DTumbleDataRecordsDto;
 import co.yixiang.modules.device.tumbledatarecords.service.dto.DTumbleDataRecordsQueryCriteria;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.data.domain.Pageable;
 
 import javax.servlet.http.HttpServletResponse;
@@ -48,12 +47,5 @@ public interface DTumbleDataRecordsService  extends BaseService<DTumbleDataRecor
     * @throws IOException /
     */
     void download(List<DTumbleDataRecordsDto> all, HttpServletResponse response) throws IOException;
-
-    /**
-     * 处理终端上传过来的数据
-     * @param json
-     * @throws Exception
-     */
-    void handleTumbleReportData(JSONObject json) throws Exception;
 
 }

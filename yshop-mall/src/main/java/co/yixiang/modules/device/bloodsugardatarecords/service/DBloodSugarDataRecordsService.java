@@ -45,4 +45,9 @@ public interface DBloodSugarDataRecordsService  extends BaseService<DBloodSugarD
     * @throws IOException /
     */
     void download(List<DBloodSugarDataRecordsDto> all, HttpServletResponse response) throws IOException;
+
+
+    void saveEntity(DBloodSugarDataRecords entity,String imei);
+
+
 }

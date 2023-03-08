@@ -84,7 +84,7 @@ yshop:
 #是否开启 swagger-ui，生产环境默认不开启
 swagger:
   enabled: true
-  title: yshop商城移动端API
+  title: 商城移动端API
   serverUrl: http://localhost:8009
   version: 3.3
 

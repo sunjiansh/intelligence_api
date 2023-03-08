@@ -99,6 +99,6 @@ file:
 
 #智能手环&尿酸分析仪API平台
 watchUricApi:
-  baseurl: https://api-xintai-beta.colofoo.com/openapi
+  baseurl: https://api-xintai.colofoo.com/openapi
   appId: fImp9lor
   appSecret: aa35cbe2907b18ba6924b9e753cd4ae1a6ea37dc

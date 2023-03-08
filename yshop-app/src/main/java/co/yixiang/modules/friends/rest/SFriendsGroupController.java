@@ -175,8 +175,7 @@ public class SFriendsGroupController {
 
         String codeKey = CODE_INVITE_PREFIX + phone;
         if (ObjectUtil.isNotNull(redisUtil.get(codeKey))) {
-            //return ApiResult.fail("已发送过验证码");//短信功能正常后开放
-            return ApiResult.fail("10分钟内有效:" + redisUtil.get(codeKey).toString());
+            return ApiResult.fail("已发送过验证码");//短信功能正常后开放
         }
         String code = RandomUtil.randomNumbers(ShopConstants.YSHOP_SMS_SIZE);
         //redis存储

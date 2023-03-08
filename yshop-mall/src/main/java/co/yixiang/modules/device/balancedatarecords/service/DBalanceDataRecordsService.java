@@ -11,6 +11,7 @@ import co.yixiang.common.service.BaseService;
 import co.yixiang.modules.device.balancedatarecords.domain.DBalanceDataRecords;
 import co.yixiang.modules.device.balancedatarecords.service.dto.DBalanceDataRecordsDto;
 import co.yixiang.modules.device.balancedatarecords.service.dto.DBalanceDataRecordsQueryCriteria;
+import co.yixiang.modules.device.bloodsugardatarecords.domain.DBloodSugarDataRecords;
 import org.springframework.data.domain.Pageable;
 import java.util.Map;
 import java.util.List;
@@ -45,4 +46,6 @@ public interface DBalanceDataRecordsService  extends BaseService<DBalanceDataRec
     * @throws IOException /
     */
     void download(List<DBalanceDataRecordsDto> all, HttpServletResponse response) throws IOException;
+
+    void saveEntity(DBalanceDataRecords entity, String imei);
 }

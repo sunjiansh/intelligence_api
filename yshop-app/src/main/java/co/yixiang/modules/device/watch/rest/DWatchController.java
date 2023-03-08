@@ -196,6 +196,16 @@ public class DWatchController {
             throw new RuntimeException("调用智能手环平台配置设置SOS号码接口失败！"+e.getMessage());
         }
 
+
+        try {
+            YxUser user = yxUserService.getOne(new LambdaQueryWrapper<YxUser>().eq(YxUser::getImei,existWatch.getImei()));
+            user.setSosContact(resources.getSos());
+            yxUserService.updateById(user);
+        }catch (Exception e){
+            log.error("同步SOS号码到用户失败！"+e.getMessage());
+            throw new RuntimeException("同步SOS号码到用户失败！"+e.getMessage());
+        }
+
         dWatchService.updateById(resources);
         return ApiResult.ok();
     }

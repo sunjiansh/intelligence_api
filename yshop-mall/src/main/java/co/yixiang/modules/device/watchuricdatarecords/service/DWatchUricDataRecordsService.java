@@ -51,14 +51,6 @@ public interface DWatchUricDataRecordsService  extends BaseService<DWatchUricDat
     void download(List<DWatchUricDataRecordsDto> all, HttpServletResponse response) throws IOException;
 
 
-    /**
-     * 处理终端上传过来的数据
-     * @param json
-     * @throws Exception
-     */
-    void handleWatchAndUricReportData(JSONObject json) throws Exception;
-
-
     List<Map> getMapLocationRecordsByImei(String day, String imei);
 
     List<Map> getMapLocationRecordsByUid(String day, Long uid);

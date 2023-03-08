@@ -212,6 +212,10 @@ public class YxUser extends BaseDomain {
     private String sosContact;
 
 
+    /** 用户年龄 */
+    private Integer age;
+
+
     /** 微信用户json信息 */
     @TableField(typeHandler = FastjsonTypeHandler.class)
     private WechatUserDto wxProfile;

@@ -90,18 +90,18 @@ public class DMdeviceDeviceController {
     public ResponseEntity<PageResult<DMdeviceDeviceDto>> getDMdeviceDevicesByMidAndDeviceType(@PathVariable(name = "mid") Long mid,@PathVariable(name = "deviceType") String deviceType){
     //    List<DMdeviceDevice>  xxx = dMdeviceDeviceService.list(new LambdaQueryWrapper<DMdeviceDevice>().eq(DMdeviceDevice::getMid, mid).eq(DMdeviceDevice::getDtype, deviceType));
         switch (deviceType){
-            case "0":
+            case DMdeviceDevice.DTYPE_BLOOD:
                 List<co.yixiang.modules.blood.service.dto.DBloodDto> result0  =  dBloodService.queryAllBindedDeviceByMid(mid);
                 return new ResponseEntity(result0,HttpStatus.OK);
-            case "1":
+            case DMdeviceDevice.DTYPE_TUMBLE:
                 List<DTumbleDto> result1 = dTumbleService.queryAllBindedDeviceByMid(mid);
                 return new ResponseEntity(result1,HttpStatus.OK);
-            case "2":
+            case DMdeviceDevice.DTYPE_BALANCE:
                 List<DBalanceDto> result2 = dBalanceService.queryAllBindedDeviceByMid(mid);
                 return new ResponseEntity(result2,HttpStatus.OK);
-            case "3":
+            case DMdeviceDevice.DTYPE_BLOOD_FAT:
                 return new ResponseEntity(null,HttpStatus.OK);
-            case "4":
+            case DMdeviceDevice.DTYPE_ECG:
                 List<DEcgDto> result3 = dEcgService.queryAllBindedDeviceByMid(mid);
                 return new ResponseEntity(result3,HttpStatus.OK);
                 default: return new ResponseEntity(null,HttpStatus.OK);

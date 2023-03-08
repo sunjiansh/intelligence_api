@@ -12,6 +12,7 @@ import co.yixiang.common.enums.TumbleCmdEnum;
 import co.yixiang.common.service.impl.BaseServiceImpl;
 import co.yixiang.common.util.APPdataUtil;
 import co.yixiang.common.util.BASE64;
+import co.yixiang.common.util.RedisContans;
 import co.yixiang.common.utils.QueryHelpPlus;
 import co.yixiang.domain.PageResult;
 import co.yixiang.dozer.service.IGenerator;
@@ -87,101 +88,5 @@ public class DTumbleDataRecordsServiceImpl extends BaseServiceImpl<DTumbleDataRe
         }
         FileUtil.downloadExcel(list, response);
     }
-
-
-    @Override
-    public void handleTumbleReportData(JSONObject json) throws Exception {
-        String productId = json.getString("productId");
-        String imei = json.getString("IMEI");
-        String deviceId = json.getString("deviceId");
-        String protocol = json.getString("protocol");
-        String messageType = json.getString("messageType");
-        JSONObject payload = json.getJSONObject("payload");
-        String serviceId = json.getString("serviceId");
-        String tenantId = json.getString("tenantId");
-        Date timestamp = json.getDate("timestamp");
-
-        if(payload == null){
-            return;
-        }
-        String APPdata = new String(BASE64.decryptBASE64(payload.getString("APPdata")));
-        if(!APPdata.startsWith(TumbleCmdEnum.CONTENT_HEAD)){
-            return;
-        }
-
-        //TODO 1、根据IMEI验证终端设备是否有权限上传数据
-        List<YxUser> users = yxUserMapper.queryUsersByTumbleImei(imei);
-        if(users ==null){
-            //该设备没有绑定用户，无需记录上传的数据
-            return;
-        }
-        String  mainUnitImei = yxUserMapper.findMainUnitImeiByTumbleImei(imei);
-        //TODO 2、用users和redis中主机当前登陆人匹配，匹配上谁。本次上传的数据就算是谁的
-        Long userId = 1L;
-
-
-
-
-
-        //TODO 3、根据IMEI验证终端设备是否有权限上传数据
-
-
-        String cmd = APPdataUtil.getCmd(APPdata);
-        String data = APPdataUtil.getData(APPdata);
-
-        //log.error("xxxx");
-
-        TumbleCmdEnum wcmd = TumbleCmdEnum.getByValue(cmd);
-
-        DTumbleDataRecords records = new DTumbleDataRecords();
-        records.setCmd(cmd);
-        records.setCmdName(wcmd.name());
-        records.setData(data);
-        records.setContent(json.toJSONString());
-        records.setCreateTime(new Date());
-        records.setProductId(productId);
-        records.setImei(imei);
-        records.setDeviceId(deviceId);
-        records.setProtocol(protocol);
-        records.setMessageType(messageType);
-        records.setPayload(payload.toJSONString());
-        records.setServiceId(serviceId);
-        records.setTenantId(tenantId);
-        records.setPushTime(timestamp);
-        records.setUserId(userId);
-
-        switch (wcmd){
-            case ALARM://报警
-                saveAlarmInfo(records,mainUnitImei);
-                break;
-            case HEART_BEAT://心跳
-                //saveBpInfo(entity,json);
-                break;
-            case REGISTER:
-                //
-                break;
-        }
-    }
-
-
-
-
-    private void saveAlarmInfo(DTumbleDataRecords records,String mainUnitImei ){
-        //将数据发送到mqtt
-        JSONObject msg = new JSONObject();
-        msg.put("userId",records.getUserId());
-        msg.put("time",records.getPushTime());
-        msg.put("content","有人跌倒");
-        msg.put("action","ALARM");
-        try {
-            ServerMQTT.publishTerminalData(mainUnitImei,msg);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        baseMapper.insert(records);
-    }
-
-
-
 
 }

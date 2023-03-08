@@ -4,9 +4,16 @@ import co.yixiang.api.ApiResult;
 import co.yixiang.common.interceptor.AuthCheck;
 import co.yixiang.modules.articlemanage.article.domain.SArticle;
 import co.yixiang.modules.articlemanage.article.service.SArticleService;
+import co.yixiang.modules.device.apiservice.DWatchUricApiService;
+import co.yixiang.modules.device.mainunit.domain.DMailunit;
+import co.yixiang.modules.device.mainunit.service.DMailunitService;
+import co.yixiang.modules.device.mdeviceuser.domain.DMdeviceUser;
+import co.yixiang.modules.device.mdeviceuser.service.DMdeviceUserService;
 import co.yixiang.modules.device.watchuricdatarecords.service.dto.DWatchUricDataRecordsDto;
 import co.yixiang.modules.health.service.HealthSummaryService;
 import co.yixiang.modules.logging.aop.log.AppLog;
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +41,9 @@ public class HealthSummaryController {
 
     private final HealthSummaryService healthSummaryService;
     private final SArticleService sArticleService;
+    private final DWatchUricApiService dWatchUricApiService;
+    private final DMdeviceUserService dMdeviceUserService;
+    private final DMailunitService dMailunitService;
 
 
 
@@ -140,15 +150,14 @@ public class HealthSummaryController {
     }
 
 
+
     @AuthCheck
-    @GetMapping(value = "/getEcgByDay")
-    @AppLog("按天查询心电图数据")
-    @ApiOperation("按天查询心电图数据")
-    public ApiResult<List<Map>> getEcgByDay(@RequestParam("day") Date day, @RequestParam("uid") Long uid){
+    @GetMapping(value = "/getEcgDataRecords")
+    @AppLog("查询心电图测量记录数据")
+    @ApiOperation("查询心电图测量记录数据")
+    public ApiResult<List<Map>> getEcgDataRecords(@RequestParam("uid") Long uid){
         //Long uid = LocalUser.getUser().getUid();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String dayStr = simpleDateFormat.format(day);
-        List<Map> list = healthSummaryService.getEcgByDay(dayStr,uid);
+        List<Map> list = healthSummaryService.getEcgDataRecords(uid);
         return  ApiResult.ok(list);
     }
 
@@ -179,6 +188,48 @@ public class HealthSummaryController {
     }
 
 
+
+    @AuthCheck
+    @GetMapping(value = "/getRiskStateById/{uid}")
+    @AppLog("查询用户的综合健康状态")
+    @ApiOperation("查询用户的综合健康状态")
+    public ApiResult<JSONObject> getRiskStateById(@PathVariable("uid") Long uid){
+        //Long uid = LocalUser.getUser().getUid();
+        JSONObject result = null;
+        try {
+            result = dWatchUricApiService.getRiskStateById(uid);
+            if(result.getInteger("code") != 200){
+                log.error(result.getString("msg"));
+                throw new RuntimeException(result.getString("msg"));
+            }
+        }catch (Exception e){
+            log.error("调用智能手环平台查询用户综合健康状态接口失败！"+e.getMessage());
+            throw new RuntimeException("调用智能手环平台查询用户综合健康状态接口失败！"+e.getMessage());
+        }
+
+        return  ApiResult.ok(result.getJSONObject("data"));
+    }
+
+
+    @AuthCheck
+    @GetMapping(value = "/getAllHealthRecordData/{uid}")
+    @AppLog("查询用户所有测量数据")
+    @ApiOperation("查询用户所有测量数据")
+    public ApiResult<Map<String,Map<String,Object>>> getAllHealthRecordData(@PathVariable("uid") Long uid){
+        //Long uid = LocalUser.getUser().getUid();
+        String imei = null;
+        DMdeviceUser mdeviceUser = dMdeviceUserService.getOne(new LambdaQueryWrapper<DMdeviceUser>().eq(DMdeviceUser::getUid,uid));
+        if(mdeviceUser != null ){
+                Long mid = mdeviceUser.getMid();
+                DMailunit dMailunit = dMailunitService.getById(mid);
+                imei = dMailunit == null ? null:dMailunit.getImei();
+        }
+        //通过MQTT 给这台主机推送最新的健康测量数据
+        //imei不为空那么主机会和app端同步更新到最新数据，传入null则不会同步主机端的数据
+        Map<String,Map<String,Object>> result = healthSummaryService.getAndPushAllHealthRecordData(null,uid);
+
+        return  ApiResult.ok(result);
+    }
 
 
 

@@ -22,6 +22,14 @@ import co.yixiang.domain.BaseDomain;
 @Data
 @TableName("d_mdevice_device")
 public class DMdeviceDevice  {
+
+    public static final String DTYPE_BLOOD = "0";//血糖仪
+    public static final String DTYPE_TUMBLE = "1";//跌倒报警器
+    public static final String DTYPE_BALANCE = "2";//体脂秤
+    public static final String DTYPE_BLOOD_FAT= "3";//血脂仪
+    public static final String DTYPE_ECG= "4";//心电图
+
+
     @TableId
     private Long id;
 

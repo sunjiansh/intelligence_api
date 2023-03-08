@@ -10,6 +10,8 @@ package co.yixiang.modules.device.balancedatarecords.service.impl;
 
 import co.yixiang.modules.device.balancedatarecords.domain.DBalanceDataRecords;
 import co.yixiang.common.service.impl.BaseServiceImpl;
+import co.yixiang.modules.device.mqtt.ServerMQTT;
+import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import co.yixiang.dozer.service.IGenerator;
 import com.github.pagehelper.PageHelper;
@@ -32,12 +34,11 @@ import cn.hutool.core.util.IdUtil;
 //import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+
 import co.yixiang.domain.PageResult;
 /**
 * @author jiansun
@@ -66,6 +67,24 @@ public class DBalanceDataRecordsServiceImpl extends BaseServiceImpl<DBalanceData
         return baseMapper.selectList(QueryHelpPlus.getPredicate(DBalanceDataRecords.class, criteria));
     }
 
+    @Override
+    public void saveEntity(DBalanceDataRecords entity, String imei) {
+
+        //将数据发送到mqtt
+        JSONObject msg = new JSONObject();
+        msg.put("userId",entity.getUid());
+        msg.put("bodyWeight",entity.getBodyWeight());
+        msg.put("bodyBmi",entity.getBodyBmi());
+        msg.put("time",new Date());
+        msg.put("action","BALANCE");
+        try {
+            ServerMQTT.publishTerminalData(imei,msg);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        baseMapper.insert(entity);
+    }
 
     @Override
     public void download(List<DBalanceDataRecordsDto> all, HttpServletResponse response) throws IOException {

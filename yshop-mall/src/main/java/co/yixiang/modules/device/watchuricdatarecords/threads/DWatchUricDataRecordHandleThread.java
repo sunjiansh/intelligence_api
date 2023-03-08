@@ -8,6 +8,7 @@ import co.yixiang.modules.device.uric.domain.DUric;
 import co.yixiang.modules.device.uric.service.DUricService;
 import co.yixiang.modules.device.watchuricdatarecords.domain.DWatchUricDataRecords;
 import co.yixiang.modules.device.watchuricdatarecords.service.mapper.DWatchUricDataRecordsMapper;
+import co.yixiang.modules.health.service.HealthSummaryService;
 import co.yixiang.modules.monotormanage.alarmrecord.domain.SAlarmReccord;
 import co.yixiang.modules.monotormanage.alarmrecord.service.SAlarmReccordService;
 import co.yixiang.modules.monotormanage.geography.domain.SGeography;
@@ -42,6 +43,9 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 	private SGeographyService sGeographyService = (SGeographyService)SpringContextHolder.getBean(SGeographyService.class);
 	private final co.yixiang.modules.watch.service.DWatchService dWatchService = SpringContextHolder.getBean(co.yixiang.modules.watch.service.DWatchService.class);
 	private final DUricService dUricService = SpringContextHolder.getBean(DUricService.class);
+	private final HealthSummaryService healthSummaryService = SpringContextHolder.getBean(HealthSummaryService.class);
+
+
 
 
 
@@ -215,19 +219,23 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 
 
 		//将数据发送到mqtt
-		JSONObject msg = new JSONObject();
-		msg.put("userId",entity.getUserId());
-		msg.put("time",entity.getPushTime());
-		msg.put("dbp",entity.getDbp());
-		msg.put("sbp",entity.getSbp());
-		msg.put("heartRate",entity.getHeartRate());
-		msg.put("action","PHYSICAL");
-		try {
-			ServerMQTT.publishTerminalData(mainUnitImei,msg);
-		}catch (Exception e){
-			e.printStackTrace();
-		}
+//		JSONObject msg = new JSONObject();
+//		msg.put("userId",entity.getUserId());
+//		msg.put("time",entity.getPushTime());
+//		msg.put("dbp",entity.getDbp());
+//		msg.put("sbp",entity.getSbp());
+//		msg.put("heartRate",entity.getHeartRate());
+//		msg.put("action","PHYSICAL");
+//		try {
+//			ServerMQTT.publishTerminalData(mainUnitImei,msg);
+//		}catch (Exception e){
+//			e.printStackTrace();
+//		}
 		dWatchUricDataRecordsMapper.insert(entity);
+
+		//获取最新健康数据并全量发送到mqtt
+		healthSummaryService.getAndPushAllHealthRecordData(mainUnitImei,entity.getUserId());
+
 	}
 	/**
 	 *  save 心率
@@ -258,21 +266,21 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 
 
 		//将数据发送到mqtt
-		JSONObject msg = new JSONObject();
-		msg.put("userId",entity.getUserId());
-		msg.put("time",entity.getPushTime());
-		msg.put("allSleepTime",entity.getAllSleepTime());
-		msg.put("action","SLEEP");
-		try {
-			ServerMQTT.publishTerminalData(mainUnitImei,msg);
-		}catch (Exception e){
-			e.printStackTrace();
-		}
-
-
-
+//		JSONObject msg = new JSONObject();
+//		msg.put("userId",entity.getUserId());
+//		msg.put("time",entity.getPushTime());
+//		msg.put("allSleepTime",entity.getAllSleepTime());
+//		msg.put("action","SLEEP");
+//		try {
+//			ServerMQTT.publishTerminalData(mainUnitImei,msg);
+//		}catch (Exception e){
+//			e.printStackTrace();
+//		}
 
 		dWatchUricDataRecordsMapper.insert(entity);
+
+		//获取最新健康数据并全量发送到mqtt
+		healthSummaryService.getAndPushAllHealthRecordData(mainUnitImei,entity.getUserId());
 
 	}
 	/**
@@ -291,22 +299,26 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 
 
 		//将数据发送到mqtt
-		JSONObject msg = new JSONObject();
-		msg.put("userId",entity.getUserId());
-		msg.put("time",entity.getPushTime());
-		msg.put("dbp",entity.getDbp());
-		msg.put("sbp",entity.getSbp());
-		msg.put("heartRate",entity.getHeartRate());
-		msg.put("oxygen",entity.getOxygen());
-		msg.put("temperature",entity.getTemperature());
-		msg.put("action","OXYGEN");
-		try {
-			ServerMQTT.publishTerminalData(mainUnitImei,msg);
-		}catch (Exception e){
-			e.printStackTrace();
-		}
+//		JSONObject msg = new JSONObject();
+//		msg.put("userId",entity.getUserId());
+//		msg.put("time",entity.getPushTime());
+//		msg.put("dbp",entity.getDbp());
+//		msg.put("sbp",entity.getSbp());
+//		msg.put("heartRate",entity.getHeartRate());
+//		msg.put("oxygen",entity.getOxygen());
+//		msg.put("temperature",entity.getTemperature());
+//		msg.put("action","OXYGEN");
+//		try {
+//			ServerMQTT.publishTerminalData(mainUnitImei,msg);
+//		}catch (Exception e){
+//			e.printStackTrace();
+//		}
 
 		dWatchUricDataRecordsMapper.insert(entity);
+
+		//获取最新健康数据并全量发送到mqtt
+		healthSummaryService.getAndPushAllHealthRecordData(mainUnitImei,entity.getUserId());
+
 	}
 	/**
 	 *  save 体温
@@ -318,18 +330,21 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 		entity.setTemperature(json.getString("temperature"));
 
 		//将数据发送到mqtt
-		JSONObject msg = new JSONObject();
-		msg.put("userId",entity.getUserId());
-		msg.put("temperature",entity.getTemperature());
-		msg.put("time",entity.getPushTime());
-		msg.put("action","TEMPERATURE");
-		try {
-			ServerMQTT.publishTerminalData(mainUnitImei,msg);
-		}catch (Exception e){
-			e.printStackTrace();
-		}
+//		JSONObject msg = new JSONObject();
+//		msg.put("userId",entity.getUserId());
+//		msg.put("temperature",entity.getTemperature());
+//		msg.put("time",entity.getPushTime());
+//		msg.put("action","TEMPERATURE");
+//		try {
+//			ServerMQTT.publishTerminalData(mainUnitImei,msg);
+//		}catch (Exception e){
+//			e.printStackTrace();
+//		}
 
 		dWatchUricDataRecordsMapper.insert(entity);
+
+		//获取最新健康数据并全量发送到mqtt
+		healthSummaryService.getAndPushAllHealthRecordData(mainUnitImei,entity.getUserId());
 
 	}
 	/**
@@ -381,18 +396,22 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 		entity.setRecordTime(json.getLong("recordTime"));
 
 		//将数据发送到mqtt
-		JSONObject msg = new JSONObject();
-		msg.put("userId",entity.getUserId());
-		msg.put("uricAcid",entity.getUricAcid());
-		msg.put("time",entity.getPushTime());
-		msg.put("action","URICACID");
-		try {
-			ServerMQTT.publishTerminalData(mainUnitImei,msg);
-		}catch (Exception e){
-			e.printStackTrace();
-		}
+//		JSONObject msg = new JSONObject();
+//		msg.put("userId",entity.getUserId());
+//		msg.put("uricAcid",entity.getUricAcid());
+//		msg.put("time",entity.getPushTime());
+//		msg.put("action","URICACID");
+//		try {
+//			ServerMQTT.publishTerminalData(mainUnitImei,msg);
+//		}catch (Exception e){
+//			e.printStackTrace();
+//		}
 
 		dWatchUricDataRecordsMapper.insert(entity);
+
+		//获取最新健康数据并全量发送到mqtt
+		healthSummaryService.getAndPushAllHealthRecordData(mainUnitImei,entity.getUserId());
+
 	}
 	/**
 	 *  save 血糖仪血酮数据
