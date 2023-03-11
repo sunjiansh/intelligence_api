@@ -26,7 +26,7 @@ public interface SFriendsGroupMapper extends CoreMapper<SFriendsGroup> {
 
 
 
-    @Select("select a.id,a.label,b.real_name realName,b.phone from s_friends_group a inner join yx_user b on a.friend_uid = b.uid where a.main_uid=#{uid}")
+    @Select("select a.id,a.label,b.real_name realName,b.phone,b.uid from s_friends_group a inner join yx_user b on a.friend_uid = b.uid where a.main_uid=#{uid}")
     List<Map> queryFriendListByMainId(@Param("uid") Long uid);
 
 }

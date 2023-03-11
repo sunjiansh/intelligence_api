@@ -50,4 +50,11 @@ public class DTumbleDto implements Serializable {
     private Integer isActive;
 
     private Long mid;
+
+    //安装高度
+    private Integer height;
+
+    //跌倒时长,可设置5-180s
+    private Integer fallDownTime;
+
 }

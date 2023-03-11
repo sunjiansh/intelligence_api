@@ -186,27 +186,27 @@ public class DTumbleDataRecordHandleThread implements Runnable{
             //TODO 保存一条报警信息,这个逻辑应该放在SOS报警的地方
             YxUser user  = yxUserMapper.selectById(records.getUserId());
             co.yixiang.modules.watch.domain.DWatch watch = dWatchService.getOne(new LambdaQueryWrapper<DWatch>().eq(DWatch::getImei,user.getImei()));
-            SVipSosRecord sVipSosRecord = new SVipSosRecord();
-            Date now = new Date();
-            sVipSosRecord.setMemberId(user.getUid());
-            sVipSosRecord.setMemberName(user.getRealName());
-            sVipSosRecord.setMemberPhone(user.getPhone());
-            sVipSosRecord.setSosTime(now);
-            sVipSosRecord.setServiceEndTime(user.getServiceEnd());
-            sVipSosRecord.setSosContact(watch==null?"没有绑定手环，无SOS联系人":watch.getSos());
-            if(user.getServiceEnd() != null){
-                if(now.before(user.getServiceEnd())){
-                    int days = DateUtils.differentDaysByMillisecond(now,user.getServiceEnd());
-                    sVipSosRecord.setLastDays(days > 0?days:0);
-                }else{
-                    sVipSosRecord.setLastDays(0);
-                }
-            }
-            try {
-                sVipSosRecordService.save(sVipSosRecord);
-            }catch (Exception e){
-                log.error("保存SOS报警记录失败！"+e.getMessage());
-            }
+//            SVipSosRecord sVipSosRecord = new SVipSosRecord();
+//            Date now = new Date();
+//            sVipSosRecord.setMemberId(user.getUid());
+//            sVipSosRecord.setMemberName(user.getRealName());
+//            sVipSosRecord.setMemberPhone(user.getPhone());
+//            sVipSosRecord.setSosTime(now);
+//            sVipSosRecord.setServiceEndTime(user.getServiceEnd());
+//            sVipSosRecord.setSosContact(watch==null?"没有绑定手环，无SOS联系人":watch.getSos());
+//            if(user.getServiceEnd() != null){
+//                if(now.before(user.getServiceEnd())){
+//                    int days = DateUtils.differentDaysByMillisecond(now,user.getServiceEnd());
+//                    sVipSosRecord.setLastDays(days > 0?days:0);
+//                }else{
+//                    sVipSosRecord.setLastDays(0);
+//                }
+//            }
+//            try {
+//                sVipSosRecordService.save(sVipSosRecord);
+//            }catch (Exception e){
+//                log.error("保存SOS报警记录失败！"+e.getMessage());
+//            }
 
 
 

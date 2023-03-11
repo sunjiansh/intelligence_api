@@ -38,11 +38,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -83,6 +79,17 @@ public class UserController {
         YxUser yxUser = LocalUser.getUser();
         return ApiResult.ok(yxUserService.getNewYxUserById(yxUser));
     }
+
+    /**
+     * 根据ID获取用户资料
+     */
+    @AuthCheck
+    @GetMapping("/userInfoById/{uid}")
+    @ApiOperation(value = "获取用户信息",notes = "获取用户信息",response = YxUserQueryVo.class)
+    public ApiResult<Object> userInfoById(@PathVariable("uid") Long uid){
+        return ApiResult.ok(yxUserService.getYxUserById(uid));
+    }
+
 
     /**
      * 获取个人中心菜单

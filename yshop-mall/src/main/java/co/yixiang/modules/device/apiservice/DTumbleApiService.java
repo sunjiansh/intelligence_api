@@ -2,6 +2,7 @@ package co.yixiang.modules.device.apiservice;
 
 import co.yixiang.common.enums.TumbleCmdEnum;
 import co.yixiang.common.util.HexUtil;
+import co.yixiang.utils.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.ctg.ag.sdk.biz.AepDeviceCommandClient;
 import com.ctg.ag.sdk.biz.aep_device_command.CreateCommandRequest;
@@ -112,7 +113,7 @@ public class DTumbleApiService {
      * @param productId
      * @return
      */
-    public static JSONObject configDevice(String deviceId,Integer productId) throws Exception{
+    public static JSONObject configDevice(String deviceId,String productId,String fallDwonTime) throws Exception{
         //AA550D04090908E001050000000011
         //帧头解析
         //帧头（2字节）:      AA55
@@ -132,7 +133,11 @@ public class DTumbleApiService {
         String params_byte0 = "08";//无人报警时长8:8小时无人报警
         String params_byte1 = "E0";//设置状态开关   BIT15=1 固定1   BIT14=1  有人报警开启  BIT13=1:无人报警关闭  BIT12=0:跌倒报警关闭  BIT11=0:驻留报警关闭
         String params_byte2 = "01";//驻留时长1： 1分钟
-        String params_byte3 = "08";//跌倒时长:  8秒 (可设置5-180s)
+        String params_byte3 = "08";//默认跌倒时长:  8秒 (可设置5-180s) 1E为30秒
+
+        if(StringUtils.isNotEmpty(fallDwonTime)){
+            params_byte3 = fallDwonTime;
+        }
 
         //有人报警开启\无人报警关闭\跌倒报警开启\驻留报警关闭(BIT15=1 固定1   BIT14=1  有人报警开启  BIT13=1:无人报警关闭  BIT12=0:跌倒报警关闭  BIT11=0:驻留报警关闭  )
         String new_params_byte1 = HexUtil.binary2HexString("11010000");
@@ -271,7 +276,7 @@ public class DTumbleApiService {
 
         System.out.println(HexUtil.makeChecksum("0D0409081801000000000000"));
 
-        configDevice("8a940782d52d493581770cc64cdfcba2",15518212);
+        configDevice("8a940782d52d493581770cc64cdfcba2","15518212",null);
        // configHeight("8a940782d52d493581770cc64cdfcba2",15518212,240);
 
 

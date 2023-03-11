@@ -294,7 +294,8 @@ public class DWatchUricDataRecordHandleThread implements Runnable {
 		entity.setSbp(json.getDouble("sbp"));
 		entity.setHeartRate(json.getDouble("heartRate"));
 		entity.setOxygen(json.getDouble("oxygen"));
-		entity.setTemperature(json.getString("temperature"));
+		//不用上传体温，这里收到的temperature都是0.0
+		//entity.setTemperature(json.getString("temperature"));
 
 
 

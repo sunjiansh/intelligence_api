@@ -13,6 +13,7 @@ import co.yixiang.api.YshopException;
 import co.yixiang.common.aop.NoRepeatSubmit;
 import co.yixiang.common.bean.LocalUser;
 import co.yixiang.common.interceptor.AuthCheck;
+import co.yixiang.common.util.HexUtil;
 import co.yixiang.dozer.service.IGenerator;
 import co.yixiang.modules.device.apiservice.DTumbleApiService;
 import co.yixiang.modules.device.mainunit.domain.DMailunit;
@@ -106,6 +107,7 @@ public class DTumbleController {
     public ApiResult<Boolean> update(@Validated @RequestBody DTumble resources){
         DTumble dTumble = dTumbleService.getById(resources.getId());
         dTumble.setHeight(resources.getHeight());
+        dTumble.setFallDownTime(resources.getFallDownTime());
 
         if(dTumble.getDeviceId() == null){
             throw new YshopException("设备的deviceId为空，等设备自动同步信息后再试！");
@@ -125,6 +127,18 @@ public class DTumbleController {
         }catch (Exception e){
             throw new YshopException(e.getMessage());
         }
+
+        try {
+            String fallDwonTime = HexUtil.decToHex(dTumble.getFallDownTime()).toUpperCase();
+            if(fallDwonTime.length()%2 != 0){
+                fallDwonTime = "0"+fallDwonTime;
+            }
+           DTumbleApiService.configDevice(dTumble.getDeviceId(),dTumble.getProductId(),fallDwonTime);
+        }catch (Exception e){
+            throw new YshopException(e.getMessage());
+        }
+
+
         dTumbleService.updateById(dTumble);
         return  ApiResult.ok();
     }

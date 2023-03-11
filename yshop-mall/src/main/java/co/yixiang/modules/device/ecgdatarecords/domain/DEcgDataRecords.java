@@ -6,7 +6,9 @@
 * 购买后可获得全部源代码（禁止转卖、分享、上传到码云、github等开源平台）
 * 一经发现盗用、分享等行为，将追究法律责任，后果自负
 */
-package co.yixiang.modules.device.tumble.domain;
+package co.yixiang.modules.device.ecgdatarecords.domain;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -19,61 +21,31 @@ import co.yixiang.domain.BaseDomain;
 
 /**
 * @author jiansun
-* @date 2023-01-11
+* @date 2023-03-06
 */
 @Data
-@TableName("d_tumble")
-public class DTumble  {
+@TableName("d_ecg_data_records")
+public class DEcgDataRecords  {
     @TableId
     private Long id;
 
-    /** 名称 */
-    private String name;
+    /** 用户id */
+    @NotNull
+    private Long uid;
 
-    /** imei */
-    @NotBlank
-    private String imei;
+    /** 平均心率 */
+    private Float averageHeartRate;
 
-    /** 型号 */
-    private String model;
-
-    /** 序列号 */
-    private String sn;
-
-    /** 品牌 */
-    private String brand;
-
-    /** 备注 */
-    private String mark;
+    /** ai报告地址 */
+    private String reportUrl;
 
 
-    /** 是否已激活 0 未激活 1 已激活 */
-    private Integer isActive;
-
-    private String productId;
-
-    private String deviceId;
-
-    private String serviceId;
-
-    private String tenantId;
-
-    private String imsi;
-
-    private String iccid;
-
-    //安装高度
-    private Integer height;
-
-    //跌倒时长,可设置5-180s
-    private Integer fallDownTime;
-
-
+    @TableField(fill= FieldFill.INSERT)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date createTime;
 
 
-    public void copy(DTumble source){
+    public void copy(DEcgDataRecords source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
     }
 }

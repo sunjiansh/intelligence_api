@@ -66,6 +66,9 @@ public class DTumble  {
     //安装高度
     private Integer height;
 
+    //跌倒时长,可设置5-180s
+    private Integer fallDownTime;
+
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date createTime;

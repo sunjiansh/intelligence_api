@@ -7,8 +7,16 @@
 * 一经发现盗用、分享等行为，将追究法律责任，后果自负
 */
 package co.yixiang.modules.servermanage.sosrecord.rest;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+
+import co.yixiang.api.ApiResult;
 import co.yixiang.dozer.service.IGenerator;
+import co.yixiang.modules.device.watchuricdatarecords.service.dto.DWatchUricDataRecordsDto;
+import co.yixiang.modules.health.service.HealthSummaryService;
+import co.yixiang.modules.logging.aop.log.AppLog;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import co.yixiang.modules.logging.aop.log.Log;
 import co.yixiang.modules.servermanage.sosrecord.domain.SVipSosRecord;
@@ -23,6 +31,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import co.yixiang.domain.PageResult;
 /**
@@ -35,6 +46,7 @@ import co.yixiang.domain.PageResult;
 @RequestMapping("/api/sVipSosRecord")
 public class SVipSosRecordController {
 
+    private final HealthSummaryService healthSummaryService;
     private final SVipSosRecordService sVipSosRecordService;
     private final IGenerator generator;
 
@@ -82,4 +94,73 @@ public class SVipSosRecordController {
         });
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+
+
+
+
+
+    @PostMapping(value = "/getAllHealthDataByDay")
+    @AppLog("按天查一个人的所有健康数据")
+    @ApiOperation("按天查一个人的所有健康数据")
+    public ResponseEntity<Map<String,Object>> getAllHealthDataByDay(@RequestBody JSONObject jsonObject){
+
+        Date day = jsonObject.getDate("day");
+        Long uid = jsonObject.getLong("uid");
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String dayStr = simpleDateFormat.format(day);
+        Map<String,Object>  result = Maps.newHashMap();
+
+        List<Map> bloodPreasure = healthSummaryService.getBloodPreasureByDay(dayStr,uid);
+        if(bloodPreasure != null)
+            result.put("BLOODPREASURE",bloodPreasure);
+
+        List<Map> heartRate = healthSummaryService.getHeartRateByDay(dayStr,uid);
+        if(heartRate != null)
+            result.put("HEARTRATE",heartRate);
+
+        List<Map> bloodSugar = healthSummaryService.getBloodSugarByDay(dayStr,uid);
+        if(bloodSugar != null)
+            result.put("BLOODSUGAR",bloodSugar);
+
+        List<Map> uricAcid = healthSummaryService.getUricAcidByDay(dayStr,uid);
+        if(uricAcid != null)
+            result.put("URICACID",uricAcid);
+
+        List<Map> fallDown = healthSummaryService.getFallDownByDay(dayStr,uid);
+        if(fallDown != null)
+            result.put("FALLDOWN",fallDown);
+
+        List<Map> oxygen = healthSummaryService.getOxygenByDay(dayStr,uid);
+        if(oxygen != null)
+            result.put("OXYGEN",oxygen);
+
+        DWatchUricDataRecordsDto sleep = healthSummaryService.getSleepRecordByDay(dayStr,uid);
+        if(sleep != null)
+            result.put("SLEEPRECORD",sleep);
+
+        List<Map> pulseRate = healthSummaryService.getPulseRateByDay(dayStr,uid);
+        if(pulseRate != null)
+            result.put("PULSERATE",pulseRate);
+
+        List<Map> temperature = healthSummaryService.getTemperatureByDay(dayStr,uid);
+        if(temperature != null)
+            result.put("TEMPERATURE",temperature);
+
+        List<Map> weight = healthSummaryService.getWeightByDay(dayStr,uid);
+        if(weight != null)
+            result.put("WEIGHT",weight);
+
+        List<Map> ecg = healthSummaryService.getEcgDataRecords(uid);
+        if(ecg != null)
+            result.put("ECG",ecg);
+
+        return new  ResponseEntity<>(result,HttpStatus.OK);
+    }
+
+
+
+
+
 }

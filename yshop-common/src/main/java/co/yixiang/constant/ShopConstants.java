@@ -66,7 +66,7 @@ public interface ShopConstants {
 	/**
 	 * 商城默认注册图片
 	 */
-	String YSHOP_DEFAULT_AVATAR = "https://image.dayouqiantu.cn/5e79f6cfd33b6.png";
+	String YSHOP_DEFAULT_AVATAR = "http://appapi.jsktzx.com/api/file/pic/20230309094117522080.png";
 
 	/**
 	 * 腾讯地图地址解析
